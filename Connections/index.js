@@ -7,7 +7,6 @@ const {
 } = require("@adiwajshing/baileys");
 const chalk = require("chalk");
 const fs = require("fs");
-const { spawn } = require("child_process");
 const { start, success } = require("./../functions");
 const simple_connection = require("./../SimpleConnections");
 const WAConnection = simple_connection.WAConnection(_WAConnection);
