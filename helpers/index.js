@@ -1,5 +1,6 @@
 'use strict';
 const fs = require("fs");
+const { M } = require("human-readable");
 
 const m = '```';
 const b = '*';
@@ -44,6 +45,8 @@ ${m}[ ${number += 1} ] ${prefix}githubstalk${m}
 \t\t\t\t\t</ ${b}MAKER${b} >
 
 ${m}[ ${number += 1} ] ${prefix}sticker${m}
+${m}[ ${number += 1} ] ${prefix}nulis${m}
+${m}[ ${number += 1} ] ${prefix}ssweb${m}
 ${m}[ ${number += 1} ] ${prefix}wasted${m}
 ${m}[ ${number += 1} ] ${prefix}wanted${m}
 ${m}[ ${number += 1} ] ${prefix}jail${m}
@@ -126,6 +129,31 @@ ${m}[ ${number += 1} ] ${prefix}covidworld${m}
 ${m}[ ${number += 1} ] ${prefix}kbbi${m}
 ${m}[ ${number += 1} ] ${prefix}infocuaca${m}
 
+\t\t\t\t\t</ ${b}ANIME${b} >
+
+${m}[ ${number += 1} ] ${prefix}kusonime${m}
+${m}[ ${number += 1} ] ${prefix}manga${m}
+${m}[ ${number += 1} ] ${prefix}loli${m}
+${m}[ ${number += 1} ] ${prefix}waifu${m}
+${m}[ ${number += 1} ] ${prefix}neko${m}
+${m}[ ${number += 1} ] ${prefix}husbu${m}
+
+\t\t\t\t\t</ ${b}RANDOM${b} >
+
+${m}[ ${number += 1} ] ${prefix}ppcouple${m}
+${m}[ ${number += 1} ] ${prefix}cerpen${m}
+${m}[ ${number += 1} ] ${prefix}meme${m}
+${m}[ ${number += 1} ] ${prefix}darkjoke${m}
+${m}[ ${number += 1} ] ${prefix}randomgore${m}
+${m}[ ${number += 1} ] ${prefix}cersex${m}
+${m}[ ${number += 1} ] ${prefix}randombokep${m}
+
+\t\t\t\t\t</ ${b}SEARCHING${b} >
+
+${m}[ ${number += 1} ] ${prefix}ttsearch${m}
+${m}[ ${number += 1} ] ${prefix}ytsearch${m}
+${m}[ ${number += 1} ] ${prefix}bokepsearch${m}
+
 \t\t\t\t\t</ ${b}TOOLS${b} >
 
 ${m}[ ${number += 1} ] ${prefix}tourl${m}
@@ -150,7 +178,7 @@ ${m}[ ${number += 1} ] ${prefix}pesoff${m}
 ${m}[ ${number += 1} ] ${prefix}mute${m}
 ${m}[ ${number += 1} ] ${prefix}unmute${m}
 ${m}[ ${number += 1} ] ${prefix}status${m}
-${m}[ ${number += 1} ] ${prefix}setprefix [ Optional ]${m}
+${m}[ ${number += 1} ] ${prefix}setprefix${m}
 ${m}[ ${number += 1} ] ${prefix}public${m}
 ${m}[ ${number += 1} ] ${prefix}self${m}
 ${m}[ ${number += 1} ] ${prefix}setfake${m}

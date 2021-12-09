@@ -34,6 +34,7 @@ const Xcoders = require("./../SimpleConnections");
 
 //menu
 const { Features, botstat } = require("./../helpers");
+const { fromBuffer } = require("file-type");
 
 let ownerNumber = global.ownerNumber;
 let packname = global.packname;
@@ -198,7 +199,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					}, MessageType.buttonsMessage, { quoted: love, contextInfo: { mentionedJid: [sender] } });
 				break;
 			case 'information':
-				string = `Owner: @${ownerNumber[0].split("@")[0]}\nRest APIs: ${restApi}\n⏲️ Jam: ${Jam}\n📆 Tanggal: ${tanggal()}\n\nBot Ini Dibuat Untuk Example Rest Api\nMaaf Jika Masih Ada Bug\nUntuk apikey silahkan register/beli\n`
+				string = `\n💫 Owner: @${ownerNumber[0].split("@")[0]}\n♨️ Rest APIs: ${restApi}\n🔰 Script: https://github.com/Fxc7/weabot-example/\n⏲️ Jam: ${Jam}\n📆 Tanggal: ${tanggal()}\n\n\nBot Ini Dibuat Untuk Example Rest Api\nMaaf Jika Masih Ada Bug\nUntuk apikey silahkan register/beli\n`
 				xcoders.sendMessage(from, string, "conversation", { quoted: love, contextInfo: { mentionedJid: [ownerNumber[0]] } })
 				break;
 			case 'stat':
@@ -252,7 +253,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtube.com/shorts/g3DMeUAXqLA?feature=share`);
 				if (!query.match(/youtube.com\/short/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytshort?url=${query}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				ytshort = `\n\t\t\t\t[ YOUTUBE SHORT ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Published: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Viewers: ${res.result.views}\n⊳ Size: ${res.result.size}\n\n${res.result.description}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
@@ -264,7 +265,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp3?url=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				ytmp3 = `\n\t\t\t\t[ YOUTUBE MP3 ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Publish: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Views: ${res.result.views}\n⊳ Size: ${res.result.size}\n`;
 				buff = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
@@ -276,7 +277,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp4?url=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				ytmp4 = `\n\t\t\t\t[ YOUTUBE MP4 ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Publish: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Views: ${res.result.views}\n⊳ Size: ${res.result.size}\n⊳ Publish: ${res.result.uploaded_at}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
@@ -287,7 +288,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'joox':
 				if (args.length < 1) return reply(`Example: ${prefix + command} momolog pamumgkas`);
 				res = await getJson(`https://api-xcoders.xyz/api/download/joox?query=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				joox = `\n\t\t\t\t[ JOOX DOWNLOADER ]\n\n⊳ Title: ${res.result.judul}\n⊳ Artist: ${res.result.artist}\n⊳ Album: ${res.result.album}\n⊳ Size: ${res.result.size}\n⊳ Duration: ${res.result.duration}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.link);
@@ -299,8 +300,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.facebook.com/alanwalkermusic/videos/277641643524720`);
 				if (!query.match(/facebook/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/fb?url=${query}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
-				res = await getJson(`https://api-xcoders.xyz/api/download/fb?url=https://www.facebook.com/alanwalkermusic/videos/277641643524720&apikey=han`)
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				const fbdlUrl = await axios.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
 				if (res.result.data.size > 50000000) {
 					fbdl = `\n\t\t\t\t[ FACEBOOK DOWNLOADER ]\n\n⊳ Size: ${res.result.data.formattedSize}\n⊳ Quality: ${res.result.data.quality}\n\n\nOps Your Request Soo Large Please Klick Url Below To Download Video\n\n⊳ Url: ${fbdlUrl.data}`;
@@ -318,37 +318,42 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'igdl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.instagram.com/p/CNtpwxuH5NK/?igshid=g26k5coikzwr`)
 				if (!query.match(/instagram\.com\/(?:p|reel)/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/ig?url=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
-				if (res.result.type == "image") {
-					caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
-					reply(Waiting)
-					sendImage(from, await getBuffer(res.result.url), caption);
-				} else if (res.result.type == "video") {
-					caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Duration: ${res.result.duration}\n⊳ ViewsCount: ${res.result.viewCount}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
-					reply(Waiting);
-					sendVideo(from, await getBuffer(res.result.url), caption);
-				} else if (res.result.media_count !== 1) {
-					caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
-					reply(Waiting);
-					for (let grapSidecar of res.result.link) {
-						if (grapSidecar.type == "image") {
-							buff = await getBuffer(grapSidecar.url);
-							sendImage(from, buff, caption);
+				await getJson(`https://api-xcoders.xyz/api/download/ig?url=${query}&apikey=${apikey}`).then(async res => {
+					if (res.result == undefined || res.status == false) return reply(Bug);
+					if (res.result.media_count == 1) {
+						if (res.result.type == "image") {
+							caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
+							reply(Waiting)
+							sendImage(from, await getBuffer(res.result.url), caption);
+						} else if (res.result.type == "video") {
+							caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Duration: ${res.result.duration}\n⊳ ViewsCount: ${res.result.viewCount}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
+							reply(Waiting);
+							sendVideo(from, await getBuffer(res.result.url), caption);
 						} else {
-							buff = await getBuffer(grapSidecar.url);
-							sendVideo(from, buff, caption);
+							reply(Bug);
 						}
+					} else if (res.result.media_count !== 1) {
+						caption = `\n\t\t\t\t\t[ INSTAGRAM DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Fullname: ${res.result.name}\n⊳ Like: ${res.result.likes}\n⊳ Caption: ${res.result.caption}\n`;
+						reply(Waiting);
+						for (let grapSidecar of res.result.link) {
+							if (grapSidecar.type == "image") {
+								buff = await getBuffer(grapSidecar.url);
+								sendImage(from, buff, caption);
+							} else {
+								buff = await getBuffer(grapSidecar.url);
+								sendVideo(from, buff, caption);
+							}
+						}
+					} else {
+						reply(Bug);
 					}
-				} else {
-					reply(Bug);
-				}
+				}).catch(() => reply(Bug));
 				break;
 			case 'igtv':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.instagram.com/tv/CSW1PMohXDm/?utm_medium=copy_link`)
 				if (!query.match(/instagram\.com\/tv/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/igtv?url=${query}&apikey=${apikey}`)
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				const igtvUrl = await axios.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
 				if (res.result.data.size > 50000000) {
 					igtv = `\n\t\t[ INSTAGRAM TV DOWNLOADER ]\n\n⊳ Title: ${res.result.title}\n⊳ Size: ${res.result.data.formattedSize}\n⊳ Quality: ${res.result.data.quality}\n\n\nOps Your Request Soo Large Please Klick Url Below To Download Video\n\n⊳ Url: ${igtvUrl.data}`;
@@ -367,8 +372,8 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://vt.tiktok.com/ZSJhvu1AE`);
 				if (!query.match(/tiktok/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/tiktok4?url=${query}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
-				tiktok = `\n\t\t\t[ TIKTOK DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Nickname: ${res.result.nickname}\n⊳ Description: ${res.result.description}\n`
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				tiktok = `\n\t\t\t[ TIKTOK DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Nickname: ${res.result.nickname}\n⊳ Viewers: ${res.result.views}\n⊳ Description: ${res.result.description}\n`
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buff = await getBuffer(res.result.no_wm);
 				sendImage(from, thumbnail, tiktok);
@@ -379,7 +384,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://m.soundcloud.com/licooys/pamungkas-monolog`);
 				if (!query.match(/soundcloud/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/soundcloud?url=${query}&apikey=${apikey}`).then(async res => {
-					if (res.status == false) return reply(Bug);
+					if (res.result == undefined || res.status == false) return reply(Bug);
 					soundCloud = `\n\t\t\t[ SOUND CLOUD DOWNLOADER ]\n\n⊳ Title: ${res.result.title}\n⊳ Duration: ${res.result.duration}\n⊳ Quality: ${res.result.data.quality}\n⊳ Size: ${res.result.data.formattedSize}\n`
 					thumbnail = await getBuffer(res.result.thumbnail);
 					buff = await getBuffer(res.result.data.url);
@@ -422,7 +427,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://twitter.com/AligBocah/status/1416673824058134534?s=20`);
 				if (!query.match(/twitter/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/twitter?url=${query}&apikey=${apikey}`).then(async res => {
-					if (res.status == false) return reply(Bug);
+					if (res.result == undefined || res.status == false) return reply(Bug);
 					twitterdl = `\n\t\t\t\t[ TWITTER DOWNLOADER ]\n\n${res.result.desc}\n`
 					thumbnail = await getBuffer(res.result.thumb);
 					buff = await getBuffer(res.result.HD);
@@ -435,7 +440,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.icocofun.com/share/post/qUc04yiC8WapxKtUXRy9dg==?lang=id&pkg=id&share_to=copy_link&m=23d0cac4747cc62954b3b1ed94697669&d=387544412ee2b99fddea8cb15c30fdd15b79f282b6c54a2aac6ca62db597c140&nt=1`);
 				if (!query.match(/cocofun/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/cocofun?url=${query}&apikey=${apikey}`).then(async res => {
-					if (res.status == false) return reply(Bug);
+					if (res.result == undefined || res.status == false) return reply(Bug);
 					cocofun = `\n\t\t\t\t[ COCOFUN DOWNLOADER ] \n\n⊳ Title: ${res.result.title}\n⊳ Desc: ${res.result.desc}\n⊳ Like: ${h2k(res.result.like)}\n⊳ Play Count: ${h2k(res.result.play_count)}\n⊳ Shared: ${h2k(res.result.shared)}\n⊳ Resolusi: ${res.result.resolution}\n⊳ Duration: ${res.result.duration}\n`
 					thumbnail = await getBuffer(res.result.thumbnail);
 					buff = await getBuffer(res.result.url);
@@ -447,7 +452,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://store.line.me/stickershop/product/12489506/id`);
 				if (!query.match(/sticker\.line\.me/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/linesticker?url=${query}&apikey=${apikey}`).then(async res => {
-					if (res.status == false) return reply(Bug);
+					if (res.result == undefined || res.status == false) return reply(Bug);
 					stickerline = `\n\t\t\t[ STICKER LINE DOWNLOADER ]\n\nTitle: ${res.result.name}\nType: ${res.result.type}\nAuthor: ${res.result.author}\nPrice: ${res.result.price}\nCurrency: ${res.result.currency}\nProduct URL: ${res.result.product_url}\n\n\nGambar Dikirim Di Private Chat Biar Ga Terjadi Spam Di Group.`
 					thumbnail = await getBuffer(res.result.thumbnail);
 					reply(Waiting);
@@ -533,7 +538,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					buff = await getBuffer(query);
 					await createSticker(buff, packname, author, "Love").then(async res => {
 						await sendSticker(from, res);
-					})
+					}).catch(() => reply(Bug));
 				} else {
 					buffer = m.quoted ? m.quoted : m;
 					if (!/image|video/.test(buffer.mtype)) return reply(`Reply Video/Gambar dengan caption ${prefix + command}`);
@@ -544,20 +549,54 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'tahta': case 'harta':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan`);
-				reply(Waiting);
-				await getBuffer(`https://api-xcoders.xyz/api/maker/tahta?text=${query}&apikey=${apikey}`).then(async buff => {
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/tahta?text=${query}&apikey=${apikey}`)
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
 					sendImage(from, buff, `HARTA TAHTA ${query.toUpperCase()}`)
-				}).catch(() => reply(Bug));
+				}
+				break;
+			case 'ssweb':
+				if (args.length < 1) return reply(`Example: ${prefix + command} ${restApi}`);
+				if (!isUrl(query)) return reply(invalidUrl);
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/ssweb?url=${query}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff);
+				}
+				break;
+			case 'nulis': case 'tulis':
+				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan|12 TKR 4|Teks nya`);
+				nama = query.split("|")[0];
+				kelas = query.split("|")[1];
+				teks = query.split("|")[2];
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/nulis2?nama=${nama}&kelas=${kelas}&text=${teks}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff)
+				}
 				break;
 			case 'costumtahta': case 'costumharta':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan|and|friend`);
 				text1 = query.split("|")[0] || "Farhan";
 				text2 = query.split("|")[1] || "And";
 				text3 = query.split("|")[2] || "Friends";
-				reply(Waiting);
-				await getBuffer(`https://api-xcoders.xyz/api/maker/costumtahta?text1=${text1}&text2=${text2}&text3=${text3}&apikey=${apikey}`).then(async buff => {
-					sendImage(from, buff, Sukses);
-				}).catch(() => reply(Bug));
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/costumtahta?text1=${text1}&text2=${text2}&text3=${text3}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff)
+				}
 				break;
 			case 'wasted':
 			case 'wanted':
@@ -584,14 +623,14 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				buffer = m.quoted ? m.quoted : m;
 				if (!/image/gi.test(buffer.mtype)) return reply(`Reply Gambar dengan caption ${prefix + command}`);
 				bufferImage = await buffer.download();
-				buff = await uploader(bufferImage);
-				try {
-					reply(Waiting);
-					buffering = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?url=${buff}&apikey=${apikey}`);
-					sendImage(from, buffering, Sukses);
-				} catch (err) {
+				upload = await uploader(bufferImage);
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?url=${upload}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
 					reply(Bug);
-					console.log(err);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff)
 				}
 				break;
 			//end maker
@@ -612,10 +651,14 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'lovetext':
 			case 'butterfly':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhannnn`);
-				await getBuffer(`https://api-xcoders.xyz/api/photooxy/${command}?text=${query}&apikey=${apikey}`).then(buff => {
+				buff = await getBuffer(`https://api-xcoders.xyz/api/photooxy/${command}?text=${query}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
 					reply(Waiting);
-					sendImage(from, buff, Sukses);
-				}).catch(() => reply(Bug));
+					sendImage(from, buff)
+				}
 				break;
 			//end photooxy
 
@@ -626,10 +669,14 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan|bot`);
 				text1 = query.split("|")[0];
 				text2 = query.split("|")[1];
-				await getBuffer(`https://api-xcoders.xyz/api/textpro/${command}?text=${text1}&text2=${text2}&apikey=${apikey}`).then(async buff => {
+				buff = await getBuffer(`https://api-xcoders.xyz/api/textpro/${command}?text=${text1}&text2=${text2}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
 					reply(Waiting);
-					await sendImage(from, buff);
-				}).catch(() => reply(Bug));
+					sendImage(from, buff)
+				}
 				break;
 			case 'embossed':
 			case 'paper':
@@ -653,10 +700,14 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'berry':
 			case 'transformer':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhannn`);
-				await getBuffer(`https://api-xcoders.xyz/api/textpro/${command}?text=${query}&apikey=${apikey}`).then(async buff => {
+				buff = await getBuffer(`https://api-xcoders.xyz/api/textpro/${command}?text=${query}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
 					reply(Waiting);
-					await sendImage(from, buff);
-				}).catch(() => reply(Bug));
+					sendImage(from, buff);
+				}
 				break;
 			//end textprome
 
@@ -664,7 +715,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'trendtweet':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
 				res = await getJson(`https://api-xcoders.xyz/api/info/trend/twitter?country=${query}&apikey=${apikey}`);
-				if (res.result.data.length < 1 || res.status == false) return reply(Bug)
+				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendtweet = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
 				for (let dataResult of res.result.data) {
@@ -675,7 +726,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'trendyt':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
 				res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube?country=${query}&apikey=${apikey}`);
-				if (res.result.data.length < 1 || res.status == false) return reply(Bug)
+				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendyt = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
 				let number = 0;
@@ -688,7 +739,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'trendytgaming':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
 				res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube/gaming?country=${query}&apikey=${apikey}`);
-				if (res.result.data.length < 1 || res.status == false) return reply(Bug)
+				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendytgaming = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
 				let numb = 0;
@@ -700,62 +751,196 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'infogempa':
 				await getJson(`https://api-xcoders.xyz/api/info/gempa?apikey=${apikey}`).then(async res => {
-					reply(Waiting);
 					Gempaa = `\t\t\t[ ${res.result.title} ]\n\n`
-					Gempaa += `Waktu :\n${res.result.waktu}\nKoordinat : ${res.result.koordinat}\nMagnitude : ${res.result.magnitude}\nLokasi : ${res.result.lokasi}\nDirasakan :\n${res.result.dirasakan}`
+					Gempaa += `Waktu :\n${res.result.waktu}\nKoordinat : ${res.result.koordinat}\nMagnitude : ${res.result.magnitude}\nLokasi : ${res.result.lokasi}\nDirasakan :\n${res.result.dirasakan}`;
+					reply(Waiting);
 					sendImage(from, await getBuffer(res.result.thumbnail), Gempaa)
 				}).catch(() => reply(Bug));
 				break;
 			case 'rsrujukan':
 				await getJson(`https://api-xcoders.xyz/api/info/rsrujukan?apikey=${apikey}`).then(res => {
-					reply(Waiting);
 					let rs = '\n\t\t\t\t[ INFO RUMAH SAKIT RUJUKAN ]\n\n';
 					for (let i = 0; i < res.result.length; i++) {
 						rs += `RS: ${res.result[i].name}\nAlamat: ${res.result[i].address}\nKota: ${res.result[i].region}\nNomer Telepon: ${res.result[i].phone}\nProvinsi: ${res.result[i].province}\n\n\n`;
 					}
+					reply(Waiting);
 					reply(rs.trim());
 				}).catch(() => reply(Bug));
 				break;
 			case 'covidindo':
 				await getJson(`https://api-xcoders.xyz/api/info/covidindo?apikey=${apikey}`).then(async res => {
-					reply(Waiting);
 					Kokpitindo = `\t\t\t[ COVID INFORMATION ]\n\n`;
 					Kokpitindo += `Country : ${res.result.country}\nPositif : ${res.result.positif}\nSembuh : ${res.result.sembuh}\nMeninggal : ${res.result.meninggal}\nDirawat : ${res.result.dirawat}\n`;
+					reply(Waiting);
 					reply(Kokpitindo);
 				}).catch(() => reply(Bug));
 				break;
 			case 'covidworld':
 				await getJson(`https://api-xcoders.xyz/api/info/covidworld?apikey=${apikey}`).then(async res => {
-					reply(Waiting);
 					Kokpitworld = `\t\t\t[ COVID INFORMATION ]\n\n`
 					Kokpitworld += `Data : ${res.result.data}\nTotal Kasus : ${res.result.total_kasus}\nSembuh : ${res.result.sembuh}\nKematian : ${res.result.kematian}\nKasus Aktif : ${res.result.kasus_aktif}\nKasus Tutup : ${res.result.kasus_tutup}\nUpdate :\n${res.result.last_update}`;
+					reply(Waiting);
 					reply(Kokpitworld);
 				}).catch(() => reply(Bug));
 				break;
 			case 'kbbi':
 				if (args.length < 1) return reply(`Example: ${prefix + command} pohon`);
 				await getJson(`https://api-xcoders.xyz/api/info/kbbi?query=${query}&apikey=${apikey}`).then(async res => {
-					reply(Waiting);
 					Kbebei = `\t\t\t\t\t\t[ K B B I ]\n\n`
-					Kbebei += `Title : ${res.result.lema}\nArti :\n${res.result.arti[0]}`
+					Kbebei += `Title : ${res.result.lema}\nArti :\n${res.result.arti[0]}`;
+					reply(Waiting);
 					reply(Kbebei)
 				}).catch(() => reply(Bug));
 				break;
 			case 'infocuaca':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Banyuwangi`)
 				await getJson(`https://api-xcoders.xyz/api/info/cuaca?query=${query}&apikey=${apikey}`).then(async res => {
-					reply(Waiting);
 					Cuaca = `\t\t\t[ INFO CUACA ${query.toUpperCase()} ]\n\n`
-					Cuaca += `Kota : ${res.result.Name}\nLongitude : ${res.result.Longitude}\nLatitude : ${res.result.Latitude}\nSunrise : ${res.result.sunrise}\nSunset : ${res.result.sunset}\nSuhu : ${res.result.Suhu}\nAngin : ${res.result.Angin}\nKelembaban : ${res.result.Kelembaban}\nCuaca : ${res.result.Cuaca}\nUdara : ${res.result.Udara}\nKeterangan : ${res.result.Keterangan}`
-					reply(Cuaca)
+					Cuaca += `Kota : ${res.result.Name}\nLongitude : ${res.result.Longitude}\nLatitude : ${res.result.Latitude}\nSunrise : ${res.result.sunrise}\nSunset : ${res.result.sunset}\nSuhu : ${res.result.Suhu}\nAngin : ${res.result.Angin}\nKelembaban : ${res.result.Kelembaban}\nCuaca : ${res.result.Cuaca}\nUdara : ${res.result.Udara}\nKeterangan : ${res.result.Keterangan}`;
+					reply(Waiting);
+					reply(Cuaca);
 				}).catch(() => reply(Bug));
 				break;
 			//end information
 
+			//anime search & image fitur
+			case 'kusonime':
+				if (args.length < 1) return reply(`Example: ${prefix + command} boruto`)
+				res = await getJson(`https://api-xcoders.xyz/api/anime/kusonime?query=${query}&apikey=${apikey}`)
+				if (anu.result == undefined || anu.status == false) return reply(Bug);
+				let kusonime = `\n\t\t\t\t[ KUSONIME SEARCH ]\n\n`
+				for (let i = 0; i < res.result.length; i++) {
+					kusonime += `Title: ${res.result[i].title}\nGenre: ${res.result[i].genre}\nURL: ${res.result[i].url}\n\n\n`
+				}
+				reply(Waiting);
+				buff = await getBuffer(res.result[0].thumbnail);
+				sendImage(from, buff, kusonime)
+				break;
+			case 'manga':
+				if (args.length < 1) return reply(`Example: ${prefix + command} kimetsu no yaiba`);
+				res = await getJson(`https://api-xcoders.xyz/api/anime/manga?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				manga = `\n\t\t\t\t[ MANGA SEARCHING ]\n\nTitle: ${res.result.title}\nName: ${res.result.name}\nAuthor: ${res.result.author}\nGenre: ${res.result.genre}\nRating: ${res.result.rating}\nRelased: ${res.result.relased}\nPublished: ${res.result.published}\nCategory: ${res.result.category}\n\n${res.result.description}\n\n==========================\n\n\n`;
+				for (let i = 0; i < res.result.download.length; i++) {
+					manga += `${res.result.download[i].data}\nType: ${res.result.download[i].type}\nUrl: ${res.result.download[i].url}\nType: ${res.result.download[i].type2}\nUrl: ${res.result.download[i].url2}\n\n================\n\n\n`;
+				}
+				reply(Waiting);
+				reply(manga);
+				break;
+			case 'loli':
+			case 'waifu':
+			case 'neko':
+			case 'husbu':
+				buff = await getBuffer(`https://api-xcoders.xyz/api/anime/${command}?apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff);
+				}
+				break;
+			//end anime
+
+			//random fitur
+			case 'cerpen':
+				if (args.length < 1) return reply(`Example: ${prefix + command} cinta\n\nOptional:\n• cinta\n• sahabat\n• perjuangan\n• horor\n• lucu\n`)
+				if (!query.match(/(cinta|sahabat|perjuangan|horor|lucu)/g)) return reply("Option Query not available")
+				res = await getJson(`https://api-xcoders.xyz/api/random/cerpen/${query}?apikey=${apikey}`)
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				reply(Waiting);
+				cerpen = `\n\t\t\t\t[ RANDOM CERPEN ${query.toUpperCase()} ]\n\nTitle: ${res.result.judul}\nPenulis: ${res.result.penulis}\nSumber: ${res.result.sumber}\n\n\n${res.result.cerita}\n`
+				reply(cerpen);
+				break;
+			case 'meme': case 'darkjoke':
+				buff = await getBuffer(`https://api-xcoders.xyz/api/random/${command}?apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendImage(from, buff);
+				}
+				break;
+			case 'randombokep':
+				res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`)
+				if (res.result == undefined || res.result == false) return reply(Bug);
+				bkp = `\n\t\t\t\t[ RANDOM BOKEP ] \n\nTitle: ${res.result.title}\nUploaded: ${res.result.views}\nURL: ${res.result.url}\n`
+				thumbnail = await getBuffer(res.result.thumb);
+				reply(Waiting);
+				sendImage(from, thumbnail, bkp);
+				break;
+			case 'cersex':
+				res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				cersex = `\n\t\t\t\t[ RANDOM CERSEX ] \n\nTitle: ${res.result.title}\nPublished: ${res.result.date}\n\n${res.result.cerita}\n`;
+				thumbnail = await getBuffer(res.result.thumbnail);
+				reply(Waiting);
+				sendImage(from, thumbnail, cersex);
+				break;
+			case 'randomgore':
+				buff = await getBuffer(`https://api-xcoders.xyz/api/random/gore?apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					sendVideo(from, buff);
+				}
+				break;
+			case 'ppcouple':
+				res = await getJson(`https://api-xcoders.xyz/api/random/ppcouple?apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				ppcwo = await getBuffer(res.result.ppcwo);
+				ppcwe = await getBuffer(res.result.ppcwe);
+				reply(Waiting);
+				sendImage(from, ppcwo, "For Male");
+				sendImage(from, ppcwe, "For Female");
+				break;
+			//end random
+
+			//searching fitur
+			case 'tiktoksearch':
+				if (args.length < 1) return reply(`Example: ${prefix + command} chikakiku`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/tiktok?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				ttsearch = `\n\t\t\t\t[ TIKTOK SEARCHING ]\n\nUsername: ${res.result.username}\nNickname: ${res.result.nickname}\nViewers: ${res.result.views}\nDescription: \n${res.result.description}`;
+				thumbnail = await getBuffer(res.result.thumbnail);
+				buff = await getBuffer(res.result.url);
+				sendImage(from, thumbnail, ttsearch);
+				reply(Waiting);
+				sendVideo(from, buff);
+				break;
+			case 'ytsearch':
+				if (args.length < 1) return reply(`Example: ${prefix + command} Bot WhatsApp`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/youtube?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				let ytsearch = `\n\t\t\t\t[ YOUTUBE SEARCHING ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					ytsearch += `Title: ${res.result[i].title}\nChannel: ${res.result[i].channel}\nPublished: ${res.result[i].published_at}\nURL: ${res.result[i].url}\n\n==========================\n\n\n`
+				}
+				thumbnail = await getBuffer(res.result[0].thumbnail);
+				reply(Waiting);
+				sendImage(from, thumbnail, ytsearch);
+				break;
+			case 'bokepsearch':
+				if (args.length < 1) return reply(`Example ${prefix + command} Tante`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/bokephub?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				bokepsearch = `\n\t\t\t\t[ BOKEP SEARCH ${query.toUpperCase()} ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					bokepsearch += `Title: ${res.result[i].title}\nURL: ${res.result[i].url}\n\n========================\n\n\n`;
+				}
+				thumbnail = await getBuffer(res.result[0].thumb);
+				reply(Waiting);
+				sendImage(from, thumbnail, bokepsearch);
+				break;
+			//end searching
+
 			//islam fitur
 			case 'asmaulhusna':
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/asmaulhusna?apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let pp = `\t\t\t\t\t [ ASMAUL HUSNA ]\n`;
 				for (let i = 0; i < res.result.length; i++) {
@@ -769,7 +954,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'jadwalsholat':
 				if (args.length < 1) return reply(`Example: ${prefix + command} banyuwangi`);
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/jadwalshalat?query=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				str = `\t\t\t\t\t [ JADWAL SHOLAT ]\n\n⊳ Daerah: ${res.result.lokasi}\n⊳ Date: ${res.result.date}\n⊳ Timezone: ${res.result.timezone}\n⊳ Subuh: ${res.result.imsak}\n⊳ Dhuha: ${res.result.sunrise}\n⊳ Dzuhur: ${res.result.dzuhur}\n⊳ Ashar: ${res.result.ashar}\n⊳ Maghrib: ${res.result.maghrib}\n⊳ Isya: ${res.result.isya}`;
 				reply(str);
@@ -777,7 +962,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'surahnumber':
 				if (args.length < 1 || !Number(query)) return reply(`Example: ${prefix + command} 10`);
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/surah?number=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let surahnumber = `\t\t\t\t\t [ SURAH NUMBER ${encodeURIComponent(query)} ]\n\n⊳ Surah: ${res.result.name}\n⊳ All Ayat: ${res.result.all_ayat}\n⊳ Number Surah: ${res.result.surah_number}\n⊳ Type: ${res.result.type}\n\n`;
 				for (i = 0; i < res.result.verses.length; i++) {
@@ -794,7 +979,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				number = query.split("/")[1];
 				if (args.length < 1 || !Number(number)) return reply(`Example: ${prefix + command} bukhari/20`);
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/hadits?kitab=${text}&number=${number}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `⊳ ${res.result.hadist}\n\n⊳ ${res.result.result}\n\n⊳ ${res.result.translate_id}`;
 				reply(capt);
 				break;
@@ -803,7 +988,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				number_ayat = query.split("/")[1];
 				if (args.length < 1 || !Number(number_surah) || !Number(number_ayat) || !number_ayat) return reply(`Example: ${prefix + command} 1/5`);
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/quran?surah=${number_surah}&ayat=${number_ayat}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `⊳ Surah: ${res.result.surah}\n⊳ Number: ${res.result.surah_no}\n⊳ Ayat: ${res.result.ayat_no}\n\n ${res.result.text_arab}\n\n${res.result.translate_id}\n\n\t\t\t\t\t\t\t [ TAFSIR AYAT ]\n\n ${res.result.tafsir.long}`;
 				reply(capt);
 				reply(Waiting);
@@ -813,7 +998,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'kisahnabi':
 				if (args.length < 1) return reply(`Example: ${prefix + command} muhammad`);
 				res = await getJson(`https://api-xcoders.xyz/api/muslim/kisahnabi?nabi=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.status == false) return reply(Bug);
+				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `\t\t\t[ KISAH NABI ${res.result.name.toUpperCase()} ]\n\n⊳ Lahir: ${res.result.kelahiran}\n⊳ Wafat: ${res.result.wafat_usia}\n⊳ Singgah: ${res.result.singgah}\n\n${res.result.kisah}\n`;
 				reply(Waiting);
 				reply(capt);
