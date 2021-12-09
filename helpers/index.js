@@ -1,6 +1,5 @@
 'use strict';
 const fs = require("fs");
-const { M } = require("human-readable");
 
 const m = '```';
 const b = '*';
