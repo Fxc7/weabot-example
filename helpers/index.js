@@ -1,5 +1,6 @@
 'use strict';
 const fs = require("fs");
+const { M } = require("human-readable");
 
 const m = '```';
 const b = '*';
@@ -22,7 +23,7 @@ ${m}[ ${number += 1} ] ${prefix}imdb${m}
 ${m}[ ${number += 1} ] ${prefix}twitter${m}
 ${m}[ ${number += 1} ] ${prefix}cocofun${m}
 ${m}[ ${number += 1} ] ${prefix}stickerline${m}
-${m}[ ${number += 1} ] ${prefix}pinterest${m}
+${m}[ ${number += 1} ] ${prefix}pindl${m}
 ${m}[ ${number += 1} ] ${prefix}xvideosdl${m}
 ${m}[ ${number += 1} ] ${prefix}xnxxdl${m}
 
@@ -43,6 +44,8 @@ ${m}[ ${number += 1} ] ${prefix}githubstalk${m}
 
 \t\t\t\t\t</ ${b}MAKER${b} >
 
+${m}[ ${number += 1} ] ${prefix}ttp${m}
+${m}[ ${number += 1} ] ${prefix}ttp3${m}
 ${m}[ ${number += 1} ] ${prefix}sticker${m}
 ${m}[ ${number += 1} ] ${prefix}nulis${m}
 ${m}[ ${number += 1} ] ${prefix}ssweb${m}
@@ -152,6 +155,18 @@ ${m}[ ${number += 1} ] ${prefix}randombokep${m}
 ${m}[ ${number += 1} ] ${prefix}ttsearch${m}
 ${m}[ ${number += 1} ] ${prefix}ytsearch${m}
 ${m}[ ${number += 1} ] ${prefix}bokepsearch${m}
+${m}[ ${number += 1} ] ${prefix}xnxxsearch${m}
+${m}[ ${number += 1} ] ${prefix}xvideossearch${m}
+${m}[ ${number += 1} ] ${prefix}searchsticker${m}
+${m}[ ${number += 1} ] ${prefix}searchgc${m}
+${m}[ ${number += 1} ] ${prefix}readwp${m}
+${m}[ ${number += 1} ] ${prefix}searchwp${m}
+${m}[ ${number += 1} ] ${prefix}googleplay${m}
+${m}[ ${number += 1} ] ${prefix}gimage${m}
+${m}[ ${number += 1} ] ${prefix}pinterest${m}
+${m}[ ${number += 1} ] ${prefix}wikipedia${m}
+${m}[ ${number += 1} ] ${prefix}lirik${m}
+${m}[ ${number += 1} ] ${prefix}chord${m}
 
 \t\t\t\t\t</ ${b}TOOLS${b} >
 
