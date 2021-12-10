@@ -64,7 +64,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 		global.blocked;
 		const cmd = (type === 'conversation' && love.message.conversation) ? love.message.conversation : (type == 'imageMessage') && love.message.imageMessage.caption ? love.message.imageMessage.caption : (type == 'videoMessage') && love.message.videoMessage.caption ? love.message.videoMessage.caption : (type == 'extendedTextMessage') && love.message.extendedTextMessage.text ? love.message.extendedTextMessage.text : ''.slice(1).trim().split(/ +/).shift().toLowerCase();
 		if (multiprefix) {
-			prefix = /^[°•π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$%^&./\\©^]/.test(cmd) ? cmd.match(/^[°•π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$,|`÷?;:%abcdefghijklmnopqrstuvwxyz%^&./\\©^]/gi) : '.';
+			prefix = /^[°⊳π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$%^&./\\©^]/.test(cmd) ? cmd.match(/^[°⊳π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$,|`÷?;:%abcdefghijklmnopqrstuvwxyz%^&./\\©^]/gi) : '.';
 		} else {
 			if (nonprefix) {
 				prefix = '';
@@ -170,7 +170,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				xcoders.sendMessage(from,
 					{
 						"contentText": fitur,
-						"footerText": `• *Features Count:* ${FiturCount} Fitur\n\n${Ucapan} & Happy Nice Days 💫`,
+						"footerText": `⊳ *Features Count:* ${FiturCount} Fitur\n\n${Ucapan} & Happy Nice Days 💫`,
 						"buttons": [
 							{
 								"buttonId": `${prefix}runtime`,
@@ -459,14 +459,14 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					sendImage(from, thumbnail, stickerline);
 					for (let stickerURL of res.result.sticker) {
 						buff = await getBuffer(stickerURL.static_url);
-						await createSticker(buff, packname, author, "Love").then(async res => {
+						await createSticker(buff, packname, author).then(async res => {
 							await delay(2000)
 							await sendSticker(sender, res);
 						})
 					}
 				}).catch(() => reply(Bug));
 				break;
-			case 'pindl': case 'pinterest':
+			case 'pindl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://id.pinterest.com/pin/881790802010631188/`);
 				if (!query.match(/pin/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/pinterest?url=${query}&apikey=${apikey}`).then(async res => {
@@ -531,20 +531,36 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			//end stalker
 
-			//Maker fitur
+			//Maker fitur 
 			case 'sticker': case 'stiker': case 's':
 				reply(Waiting);
 				if (query && /https?:\/\//.test(query)) {
 					buff = await getBuffer(query);
-					await createSticker(buff, packname, author, "Love").then(async res => {
+					await createSticker(buff, packname, author).then(async res => {
 						await sendSticker(from, res);
 					}).catch(() => reply(Bug));
 				} else {
 					buffer = m.quoted ? m.quoted : m;
-					if (!/image|video/.test(buffer.mtype)) return reply(`Reply Video/Gambar dengan caption ${prefix + command}`);
-					await createSticker(await buffer.download(), packname, author, "Love").then(async res => {
-						await sendSticker(from, res);
-					}).catch(() => reply(Bug));
+					buff = await buffer.download();
+					if ((buffer.mtype == "imageMessage" && buffer.mtype !== "videoMessage")) {
+						await createSticker(buff, packname, author).then(res => sendSticker(from, res)).catch(e => reply(String(e)));
+					} else if ((buffer.mtype == "videoMessage" && love.message.extendedTextMessage.contextInfo
+						.quotedMessage.videoMessage.seconds < 10)) {
+						await createSticker(buff, packname, author).then(res => sendSticker(from, res)).catch(e => reply(String(e)));
+					} else {
+						reply("Duration Terlalu Panjang");
+					}
+				}
+				break;
+			case 'ttp': case 'ttp3':
+				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan`);
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?text=${query}&apikey=${apikey}`);
+				filType = await fromBuffer(buff);
+				if (filType == undefined) {
+					reply(Bug);
+				} else {
+					reply(Waiting);
+					await createSticker(buff, packname, author).then(async buffer => await sendSticker(from, buffer)).catch(e => reply(String(e)));
 				}
 				break;
 			case 'tahta': case 'harta':
@@ -844,7 +860,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 
 			//random fitur
 			case 'cerpen':
-				if (args.length < 1) return reply(`Example: ${prefix + command} cinta\n\nOptional:\n• cinta\n• sahabat\n• perjuangan\n• horor\n• lucu\n`)
+				if (args.length < 1) return reply(`Example: ${prefix + command} cinta\n\nOptional:\n⊳ cinta\n⊳ sahabat\n⊳ perjuangan\n⊳ horor\n⊳ lucu\n`)
 				if (!query.match(/(cinta|sahabat|perjuangan|horor|lucu)/g)) return reply("Option Query not available")
 				res = await getJson(`https://api-xcoders.xyz/api/random/cerpen/${query}?apikey=${apikey}`)
 				if (res.result == undefined || res.status == false) return reply(Bug);
@@ -934,6 +950,134 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				thumbnail = await getBuffer(res.result[0].thumb);
 				reply(Waiting);
 				sendImage(from, thumbnail, bokepsearch);
+				break;
+			case 'xnxxsearch':
+				if (args.length < 1) return reply(`Example: ${prefix + command} moms`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/xnxx?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				xnxxs = `\n\t\t\t\t[ XNXX SEARCHING ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					xnxxs += `Title: ${res.result[i].title}\nQuality: ${res.result[i].quality}\nDuration: ${res.result[i].duration}\nURL: ${res.result[i].link}\n\n=====================\n\n\n`;
+				}
+				thumbnail = await getBuffer(res.result[0].thumb);
+				sendImage(from, thumbnail, xnxxs);
+				break;
+			case 'xvideossearch':
+				if (args.length < 1) return reply(`Example: ${prefix + command} moms`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/xvideos?query=${query}&apikey=${apikey}`)
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				reply(Waiting);
+				let xvideossrch = `\n\t\t\t\t[ XVIDEOS SEARCH ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					xvideossrch += `Title: ${res.result[i].title}\nDuration: ${res.result[i].duration}\nQuality: ${res.result[i].quality}\nURL: ${res.result[i].url}\n\n==========================\n\n\n`
+				}
+				thumbnail = await getBuffer(res.result[0].thumb)
+				sendImage(from, thumbnail, xvideossrch)
+				break;
+			case 'searchsticker': case 'searchstiker':
+				if (args.length < 1) return reply(`Example: ${prefix + command} pentol`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/sticker?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				ini_stickers = res.result.sticker;
+				reply(Waiting);
+				for (stickers_ in ini_stickers) {
+					buff = await getBuffer(ini_stickers[stickers_]);
+					await createSticker(buff, packname, author).then(buffer => sendSticker(sender, buffer)).catch(e => reply(String(e)));
+				}
+				break;
+			case 'searchgc': case 'searchgroup': case 'searchgrup':
+				if (args.length < 1) return reply(`Example: ${prefix + command} bot`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/groupwa?query=${query}&apikey=${apikey}`)
+				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
+				reply(Waiting);
+				let searchgc = `\n\t\t\t\t[ GROUP SEARCH ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					searchgc += `Name: ${res.result[i].nama}\nLink: ${res.result[i].link}\n\n==========================\n\n\n`
+				}
+				reply(searchgc)
+				break;
+			case 'readwp': case 'bacawp':
+				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.wattpad.com/699514963-bucin-satu/`);
+				if (!query.match(/wattpad\.com\/(?:[1-9][0-9]+)\-/g)) return reply(invalidUrl);
+				res = await getJson(`https://api-xcoders.xyz/api/search/bacawp?url=${encodeURIComponent(query)}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				readwp = `\n\t\t\t\t[ READ WATTPAD ]\n\n⊳ Title: ${res.result.title}\n⊳ Author: ${res.result.author_name}\n⊳ Vote: ${res.result.vote}\n⊳ Comment: ${res.result.comment}\n⊳ Next Page: ${res.result.next_page}\n⊳ Story: ${res.result.story}`;
+				thumbnail = await getBuffer(res.result.thumb);
+				reply(Waiting);
+				sendImage(from, thumbnail, readwp);
+				break;
+			case 'searchwp':
+				if (args.length < 1) return reply(`Example: ${prefix + command} bucin`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/wattpad?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				reply(Waiting);
+				let searchwp = `\n\t\t\t\t[ SEARCHING WATTPAD ]\n\n`
+				for (let i = 0; i < res.result.data.length; i++) {
+					searchwp += `⊳ Title: ${res.result.data[i].title}\n⊳ Author: ${res.result.data[i].user.name}\n⊳ All Parts: ${res.result.data[i].numParts}\n⊳ Published: ${res.result.data[i].lastPublishedPart.createDate}\n⊳ Votes: ${res.result.data[i].voteCount}\n⊳ Reading: ${h2k(res.result.data[i].readCount)}\n⊳ Comments: ${res.result.data[i].commentCount}\n⊳ URL: ${res.result.data[i].url}\n\n⊳ Description: \n${res.result.data[i].description}\n\n====================\n\n\n`;
+				}
+				thumbnail = await getBuffer(res.result.data[0].cover);
+				sendImage(from, thumbnail, searchwp);
+				break;
+			case 'googleplay':
+				if (args.length < 1) return reply(`Example: ${prefix + command} whatsapp`)
+				res = await getJson(`https://api-xcoders.xyz/api/search/googleplay?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				let gpsearch = `\n\t\t\t\t[ GOOGLE PLAY SEARCH ]\n\n`;
+				for (let i = 0; i < res.result.length; i++) {
+					gpsearch += `⊳ Title: ${res.result[i].title}\n⊳ AppID: ${res.result[i].appid}\n⊳ Developer: ${res.result[i].developer}\n⊳ DeveloperID: ${res.result[i].developerId}\n⊳ Price: ${res.result[i].price}\n⊳ Summary: ${res.result[i].summary}\n⊳ Score Text: ${res.result[i].scoreText}\n⊳ Score: ${res.result[i].score}\n\n==========================\n\n\n`;
+				}
+				reply(Waiting);
+				thumbnail = await getBuffer(res.result[0].icon);
+				sendImage(from, thumbnail, gpsearch);
+				break;
+			case 'gimage':
+				if (args.length < 1) return reply(`Example: ${prefix + command} Onic Kayess`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/image?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				reply(Waiting);
+				for (let i = 0; i < 5; i++) {
+					buff = await getBuffer(res.result[i].url);
+					sendImage(from, buff, `\n\t\t\t\t[ GOOGLE IMAGE SEARCH ]\n\n⊳ Title: ${res.result[i].title}\n⊳ Size: ${res.result[i].size}\n`)
+				}
+				break;
+			case 'pinterest':
+				if (args.length < 1) return reply(`Example: ${prefix + command} Onic Kayess`);
+				res = await getJson(`https://api-xcoders.xyz/api/search/pinterest?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false);
+				reply(Waiting);
+				for (let i = 0; i < 5; i++) {
+					buff = await getBuffer(res.result[i]);
+					sendImage(from, buff);
+				}
+				break;
+			case 'wiki': case 'wikipedia':
+				if (args.length < 1) return reply(`Example: ${prefix + command} jagung`)
+				res = await getJson(`https://api-xcoders.xyz/api/search/wikipedia?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				wiki = `\n\t\t\t\t[ WIKIPEDIA SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Publisher: ${res.result.publisher}\n⊳ Publish At: ${res.result.datePublished}\n⊳ Result: ${res.result.context}`;
+				thumbnail = await getBuffer(res.result.thumbnail);
+				reply(Waiting);
+				sendImage(from, thumbnail, wiki);
+				break;
+			case 'lirik': case 'lyrics':
+				if (args.length < 1) return reply(`Example: ${prefix + command} bukti`)
+				res = await getJson(`https://api-xcoders.xyz/api/search/liriklagu?query=${query}&apikey=${apikey}`);
+				if (res.result == undefined || res.status == false) return reply(Bug);
+				lirik = `\n\t\t\t\t[ LIRIK SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Lyrics: ${res.result.lyrics}`
+				thumbnail = await getBuffer(res.result.thumb);
+				reply(Waiting);
+				sendImage(from, thumbnail, lirik);
+				break;
+			case 'chord':
+				if (args.length < 1) return reply(`Example: ${prefix + command} duka`);
+				try {
+					res = await getJson(`https://api-xcoders.xyz/api/search/chordlagu?query=${query}&apikey=${apikey}`);
+					reply(Waiting);
+					reply(`\n\t\t\t\t[ CHORD SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Chord:\n${res.result.chord}`);
+				} catch (err) {
+					console.log(err)
+					reply(`Lirik dari lagu ${query} tidak ditemukan`)
+				}
 				break;
 			//end searching
 
@@ -1121,7 +1265,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (!m.quoted.id) return;
 				let members = m.quoted.chat.endsWith('g.us') ? (await xcoders.groupMetadata(m.quoted.chat)).participants.length - 1 : m.quoted.chat.endsWith('@broadcast') ? -1 : 1;
 				let { reads, deliveries } = await xcoders.messageInfo(m.quoted.chat, m.quoted.id);
-				let txt = `• Read by :\n× ${reads.sort((a, b) => b.t - a.t).map(({ jid, t }) => `@${jid.split`@`[0]}\n_${formatDate(t * 1000)}_`).join('\n')}\n× ${members > 1 ? `${members - reads.length} remaining` : ''}\n\n• Delivered to :\n× ${deliveries.sort((a, b) => b.t - a.t).map(({ jid, t }) => `wa.me/${jid.split`@`[0]}\n_${formatDate(t * 1000)}_`).join('\n')}\n× ${members > 1 ? `${members - reads.length - deliveries.length} remaining` : ''}`.trim();
+				let txt = `⊳ Read by :\n× ${reads.sort((a, b) => b.t - a.t).map(({ jid, t }) => `@${jid.split`@`[0]}\n_${formatDate(t * 1000)}_`).join('\n')}\n× ${members > 1 ? `${members - reads.length} remaining` : ''}\n\n⊳ Delivered to :\n× ${deliveries.sort((a, b) => b.t - a.t).map(({ jid, t }) => `wa.me/${jid.split`@`[0]}\n_${formatDate(t * 1000)}_`).join('\n')}\n× ${members > 1 ? `${members - reads.length - deliveries.length} remaining` : ''}`.trim();
 				m.reply(txt, null, { contextInfo: { mentionedJid: xcoders.parseMention(txt) } });
 				break;
 			//End Group Features
@@ -1196,7 +1340,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'setprefix':
 				if (!isMe) return;
-				if (args.length < 1) return reply(`Options:\n• multiprefix\n• nonprefix\n• bebas`);
+				if (args.length < 1) return reply(`Options:\n⊳ multiprefix\n⊳ nonprefix\n⊳ bebas`);
 				if (query === 'multiprefix') {
 					multiprefix = true;
 					reply(`Berhasil mengubah prefix ke ${query}`);
@@ -1232,7 +1376,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				}, 0);
 				break;
 			case 'status':
-				reply(`Status BOT\n${offline ? '⊳ Offline' : '⊳ Online'}\n${banChats ? '• Self-Mode' : '• Public-Mode'}`);
+				reply(`Status BOT\n${offline ? '⊳ Offline' : '⊳ Online'}\n${banChats ? '⊳ Self-Mode' : '⊳ Public-Mode'}`);
 				break;
 			case 'self':
 				if (!isMe) return;
@@ -1259,8 +1403,15 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					json: ["query", "invite", codee],
 					expect200: true
 				});
-				str = `「 Group Link Inspector 」\n\n⊳ Id: ${res.id}\n⊳ Nama grup: ${res.subject}\n⊳ Dibuat oleh @${res.id.split('-')[0]}\n⊳ pada ${formatDate(res.creation * 1000)}${res.subjectOwner ? `\n⊳ Judul diubah oleh @${res.subjectOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.subjectTime * 1000)}` : ''}${res.descOwner ? `\n⊳  Deskripsi diubah oleh @${res.descOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.descTime * 1000)}` : ''}\n⊳ Jumlah Member: ${res.size}\n⊳ Teman yang diketahui join: ${res.participants ? '\n' + res.participants.map((user, i) => ++i + '. @' + user.id.split(`@`)[0]).join('\n').trim() : 'Tidak ada'}\n${res.desc ? `\n⊳ Deskripsi:\n${res.desc}` : '\nTidak ada Deskripsi'} `;
-				xcoders.sendMessage(from, { text: monospace(str), jpegThumbnail: fs.readFileSync("./image/menu.png") }, 'extendedTextMessage', { quoted: love, contextInfo: { mentionedJid: xcoders.parseMention(str) } });
+				str = `\n\t\t\t「 Group Link Inspector 」\n\n⊳ Id: ${res.id}\n⊳ Nama grup: ${res.subject}\n⊳ Dibuat oleh @${res.id.split('-')[0]}\n⊳ pada ${formatDate(res.creation * 1000)}${res.subjectOwner ? `\n⊳ Judul diubah oleh @${res.subjectOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.subjectTime * 1000)}` : ''}${res.descOwner ? `\n⊳  Deskripsi diubah oleh @${res.descOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.descTime * 1000)}` : ''}\n⊳ Jumlah Member: ${res.size}\n⊳ Teman yang diketahui join: ${res.participants ? '\n' + res.participants.map((user, i) => ++i + '. @' + user.id.split(`@`)[0]).join('\n').trim() : 'Tidak ada'}\n${res.desc ? `\n⊳ Deskripsi:\n${res.desc}` : '\nTidak ada Deskripsi'} `;
+				let getProfile;
+				try {
+					getProfile = await xcoders.getProfilePicture(res.id);
+				} catch {
+					getProfile = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMWnXU35BqHt-Nqy5Eyu6ghATbR7_6YEcy9w&usqp=CAU";
+				}
+				buff = await getBuffer(getProfile);
+				xcoders.sendMessage(from, buff, 'imageMessage', { quoted: love, caption: monospace(str), contextInfo: { mentionedJid: xcoders.parseMention(str) } });
 				break;
 			default:
 				if ((budy.startsWith('>') || budy.startsWith('=>')) && !m.isBaileys) {
