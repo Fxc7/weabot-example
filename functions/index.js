@@ -5,14 +5,17 @@ const chalk = require("chalk");
 const { sizeFormatter } = require("human-readable");
 const { Sticker } = require("wa-sticker-formatter");
 
-async function createSticker(img, packname, author, categories = ['']) {
+async function createSticker(img, packname, author) {
 	const stickerMetadata = {
-		type: 'full', //can be full or crop
+		type: 'crop', //can be full or crop
 		pack: packname,
 		author: author,
-		categories: categories,
-	}
-	return await new Sticker(img, stickerMetadata).build()
+		id: 12345,
+		quality: 50,
+		background: '#ffffff',
+		categories: ['🤩', '🎉'],
+	};
+	return await new Sticker(img, stickerMetadata).toBuffer();
 }
 
 /*
