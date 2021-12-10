@@ -253,8 +253,8 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtube.com/shorts/g3DMeUAXqLA?feature=share`);
 				if (!query.match(/youtube.com\/short/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytshort?url=${query}&apikey=${apikey}`);
-				if (res.result == undefined || res.status == false) return reply(Bug);
-				ytshort = `\n\t\t\t\t[ YOUTUBE SHORT ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Published: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Viewers: ${res.result.views}\n⊳ Size: ${res.result.size}\n\n${res.result.description}\n`;
+				if (res.status == false) return reply(Bug);
+				ytshort = `\n\t\t\t\t[ YOUTUBE SHORT ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
 				sendImage(from, thumbnail, ytshort);
@@ -265,8 +265,8 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp3?url=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.result == undefined || res.status == false) return reply(Bug);
-				ytmp3 = `\n\t\t\t\t[ YOUTUBE MP3 ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Publish: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Views: ${res.result.views}\n⊳ Size: ${res.result.size}\n`;
+				if (res.status == false) return reply(Bug);
+				ytmp3 = `\n\t\t\t\t[ YOUTUBE MP3 ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				buff = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
 				sendImage(from, buff, ytmp3);
@@ -277,8 +277,8 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
 				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp4?url=${encodeURIComponent(query)}&apikey=${apikey}`);
-				if (res.result == undefined || res.status == false) return reply(Bug);
-				ytmp4 = `\n\t\t\t\t[ YOUTUBE MP4 ]\n\n⊳ Title: ${res.result.title}\n⊳ Channel: ${res.result.channel}\n⊳ Channel URL: ${res.result.channel_url}\n⊳ Publish: ${res.result.uploaded_at}\n⊳ Category: ${res.result.category}\n⊳ Quality: ${res.result.quality}\n⊳ Views: ${res.result.views}\n⊳ Size: ${res.result.size}\n⊳ Publish: ${res.result.uploaded_at}\n`;
+				if (res.status == false) return reply(Bug);
+				ytmp4 = `\n\t\t\t\t[ YOUTUBE MP4 ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
 				buffer = await getBuffer(res.result.url);
 				sendImage(from, thumbnail, ytmp4);
