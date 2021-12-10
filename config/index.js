@@ -15,7 +15,7 @@ global.nonprefix = false;
 global.prefix = "#";
 global.browserDescription = {
   set_name: "Xcoders",
-  set_browser: "Safari"
+  set_browser: "Chrome"
 };
 global.response = {
   "wait": "[ ⏳ ] Wait processed...",
