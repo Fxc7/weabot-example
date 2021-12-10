@@ -33,7 +33,7 @@
 		"perf_hooks": "^0.0.1",
 		"performance-now": "^2.1.0",
 		"spinnies": "^0.5.1",
-		"wa-sticker-formatter": "^4.2.0"
+		"wa-sticker-formatter": "^3.6.0"
 	},
 	"repository": {
 		"type": "git",
