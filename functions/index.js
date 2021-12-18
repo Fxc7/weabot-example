@@ -3,20 +3,6 @@ const spin = require("spinnies");
 const fs = require("fs-extra");
 const chalk = require("chalk");
 const { sizeFormatter } = require("human-readable");
-const { Sticker } = require("wa-sticker-formatter");
-
-async function createSticker(img, packname, author) {
-	const stickerMetadata = {
-		type: 'crop', //can be full or crop
-		pack: packname,
-		author: author,
-		id: 12345,
-		quality: 50,
-		background: '#ffffff',
-		categories: ['🤩', '🎉'],
-	};
-	return await new Sticker(img, stickerMetadata).toBuffer();
-}
 
 /*
 * @Media To Buffer
@@ -173,15 +159,18 @@ const kyun = (seconds) => {
 	return dDisplay + hDisplay + mDisplay + sDisplay;
 };
 
-function formatDate(n, locale = "id") {
+const formatDate = (n, locale = "id") => {
 	let d = new Date(n);
 	return d.toLocaleDateString(locale, {
 		weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "numeric", second: "numeric"
 	});
-}
+};
+
+const sleep = (ms) => { 
+	return new Promise((resolve) => setTimeout(resolve, ms))
+};
 
 module.exports = {
-	createSticker,
 	getGroupAdmins,
 	getBuffer,
 	getJson,
@@ -196,7 +185,8 @@ module.exports = {
 	color,
 	bgcolor,
 	kyun,
-	formatDate
+	formatDate,
+	sleep
 };
 
 let file = require.resolve(__filename);
