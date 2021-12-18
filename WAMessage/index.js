@@ -1,4 +1,31 @@
 require("./../config");
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+	return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+
+//external modules
+const __adiwajshing = __importDefault(require("@adiwajshing/baileys"));
+const __fs = __importDefault(require("fs"));
+const __axios = __importDefault(require("axios"));
+const __util = __importDefault(require("util"));
+const __moment = __importDefault(require("moment-timezone"));
+const __ffmpeg = __importDefault(require("fluent-ffmpeg"));
+const __childProcess = __importDefault(require("child_process"));
+const __os = __importDefault(require("os"));
+const __speed = __importDefault(require("performance-now"));
+const __WSF = __importDefault(require("wa-sticker-formatter"));
+const __performance = __importDefault(require("perf_hooks").performance);
+const __fileType = __importDefault(require("file-type"));
+
+//local module
+const __functions = __importDefault(require("./../functions"));
+const __uploader = __importDefault(require("./../library/uploader"));
+const __Xcoders = __importDefault(require("./../SimpleConnections"));
+const __features = __importDefault(require("./../helpers"));
+const __exif = __importDefault(require("./../functions/exif"));
+
 const {
 	MessageType,
 	Mimetype,
@@ -6,36 +33,30 @@ const {
 	GroupSettingChange,
 	ChatModification,
 	delay
-} = require("@adiwajshing/baileys");
-
-const fs = require("fs");
-const axios = require("axios");
-const util = require("util");
-const moment = require("moment-timezone");
-const { exec } = require("child_process");
-const os = require("os");
-const speed = require("performance-now");
-const { performance } = require("perf_hooks");
-
+} = __adiwajshing;
 const {
-	createSticker,
 	getGroupAdmins,
 	getBuffer,
 	getJson,
+	getRandom,
 	h2k,
 	tanggal,
 	sizeFormat,
 	color,
 	kyun,
-	formatDate
-} = require("./../functions");
-const uploader = require("./../library/uploader");
-const Xcoders = require("./../SimpleConnections");
+	formatDate,
+	sleep
+} = __functions.default;
+const { 
+	Features, 
+	botstat 
+} = __features.default;
+const {
+	fromBuffer
+} = __fileType.default;
 
-//menu
-const { Features, botstat } = require("./../helpers");
-const { fromBuffer } = require("file-type");
-
+const exif = new __exif.default();
+//get configs
 let ownerNumber = global.ownerNumber;
 let packname = global.packname;
 let author = global.author;
@@ -52,7 +73,7 @@ let Bug = global.response.error.bug;
 let invalidUrl = global.response.error.url;
 let Sukses = global.response.sukses;
 
-module.exports = index = async (xcoders, love, getbattery) => {
+module.exports = async (xcoders, love, getbattery) => {
 	try {
 		if (!love.hasNewMessage) return;
 		love = love.messages.all()[0];
@@ -60,9 +81,11 @@ module.exports = index = async (xcoders, love, getbattery) => {
 		if (love.key && love.key.remoteJid == 'status@broadcast') return;
 		love.message = (Object.keys(love.message)[0] === 'ephemeralMessage') ? love.message.ephemeralMessage.message : love.message;
 		const type = Object.keys(love.message)[0];
-		let m = Xcoders.smsg(xcoders, love);
+		let m = __Xcoders.default.smsg(xcoders, love);
 		global.blocked;
 		const cmd = (type === 'conversation' && love.message.conversation) ? love.message.conversation : (type == 'imageMessage') && love.message.imageMessage.caption ? love.message.imageMessage.caption : (type == 'videoMessage') && love.message.videoMessage.caption ? love.message.videoMessage.caption : (type == 'extendedTextMessage') && love.message.extendedTextMessage.text ? love.message.extendedTextMessage.text : ''.slice(1).trim().split(/ +/).shift().toLowerCase();
+		let prefix;
+		let jid;
 		if (multiprefix) {
 			prefix = /^[°⊳π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$%^&./\\©^]/.test(cmd) ? cmd.match(/^[°⊳π÷×¶∆£¢€¥®™✓=|~zZ+×_!#$,|`÷?;:%abcdefghijklmnopqrstuvwxyz%^&./\\©^]/gi) : '.';
 		} else {
@@ -74,18 +97,21 @@ module.exports = index = async (xcoders, love, getbattery) => {
 		}
 		const content = JSON.stringify(love.message);
 		const from = love.key.remoteJid;
-		const responseButtons = (type == 'buttonsResponseMessage') ? love.message.buttonsResponseMessage.selectedDisplayText : '';
-		const buttonsResponse = (type == 'buttonsResponseMessage') ? love.message.buttonsResponseMessage.selectedButtonId : '';
+		const buttonsResponseText = (type == 'buttonsResponseMessage') ? love.message.buttonsResponseMessage.selectedDisplayText : '';
+		const buttonsResponseID = (type == 'buttonsResponseMessage') ? love.message.buttonsResponseMessage.selectedButtonId : '';
 		const date = new Date().toLocaleDateString();
-		const time = moment.tz("Asia/Jakarta").format("HH:mm:ss");
-		const Jam = moment.tz("Asia/Jakarta").format("HH:mm");
-		const body = (type === 'conversation' && love.message.conversation.startsWith(prefix)) ? love.message.conversation : (type == 'imageMessage') && love.message.imageMessage.caption.startsWith(prefix) ? love.message.imageMessage.caption : (type == 'videoMessage') && love.message.videoMessage.caption.startsWith(prefix) ? love.message.videoMessage.caption : (type == 'extendedTextMessage') && love.message.extendedTextMessage.text.startsWith(prefix) ? love.message.extendedTextMessage.text : buttonsResponse;
+		const time = __moment.default.tz("Asia/Jakarta").format("HH:mm:ss");
+		const Jam = __moment.default.tz("Asia/Jakarta").format("HH:mm");
+		const body = (type === 'conversation' && love.message.conversation.startsWith(prefix)) ? love.message.conversation : (type == 'imageMessage') && love.message.imageMessage.caption.startsWith(prefix) ? love.message.imageMessage.caption : (type == 'videoMessage') && love.message.videoMessage.caption.startsWith(prefix) ? love.message.videoMessage.caption : (type == 'extendedTextMessage') && love.message.extendedTextMessage.text.startsWith(prefix) ? love.message.extendedTextMessage.text : buttonsResponseID;
 		const budy = (type === 'conversation') ? love.message.conversation : (type === 'extendedTextMessage') ? love.message.extendedTextMessage.text : '';
 		var command = body.replace(prefix, '').trim().split(/ +/).shift().toLowerCase();
 		const args = body.trim().split(/ +/).slice(1);
 		const isCmd = body.startsWith(prefix);
 		const Json = (string) => {
-			return util.format(JSON.stringify(string, null, 2));
+			return __util.default.format(JSON.stringify(string, null, 2));
+		};
+		const __err = (e) => {
+		console.log(console.log(color('[ERR]', 'red'), e));
 		};
 
 		const meNumber = xcoders.user.jid;
@@ -106,7 +132,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 		};
 
 		let Ucapan = "";
-		let hours = moment.tz("Asia/Jakarta").format("HH");
+		let hours = __moment.default.tz("Asia/Jakarta").format("HH");
 		if (hours >= 19 || hours <= 2) {
 			Ucapan += "Good Night 🌚";
 		} else if (hours >= 3 && hours <= 10) {
@@ -132,45 +158,59 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			await xcoders.sendMessage(jid, buffer, "imageMessage", { quoted: love, caption: monospace(caption), mimetype: Mimetype.png, contextInfo: { "forwardingScore": 999, "isForwarded": true }, sendEphemeral: true });
 		};
 		const sendSticker = async (jid, buffer) => {
-			await xcoders.sendMessage(jid, buffer, "stickerMessage", { quoted: love, mimetype: Mimetype.webp })
-		}
+			await xcoders.sendMessage(jid, buffer, "stickerMessage", { quoted: love, mimetype: Mimetype.webp });
+		};
 		const sendAudio = async (jid, buffer, namefile) => {
 			await xcoders.sendMessage(jid, buffer, "documentMessage", { filename: namefile, mimetype: Mimetype.mp4Audio, quoted: fakeQuoted, contextInfo: { "forwardingScore": 999, "isForwarded": true }, sendEphemeral: true });
 		};
-
 		const mentions = (teks, memberr, id) => {
 			(id == null || id == undefined || id == false) ? xcoders.sendMessage(from, teks.trim(), "extendedTextMessage", { contextInfo: { "mentionedJid": memberr } }) : xcoders.sendMessage(from, teks.trim(), "extendedTextMessage", { quoted: love, contextInfo: { "mentionedJid": memberr } });
 		};
+		const sendStickerFromUrl = async (jid, url) => {
+			try {
+				const randomName = (Date.now() / 10000).toString().split(".").join("");
+				const nameFile = `./tmp/${randomName}.png`;
+				const nameSticker = `./tmp/${randomName}.webp`;
+				const buffer = await getBuffer(url);
+				await __fs.default.writeFileSync(nameFile, new Buffer.from(buffer, "stream"));
+				await __ffmpeg.default(nameFile).on('start', function (cmd) {
+				}).on('error', function (err) {
+					__fs.default.unlinkSync(nameFile);
+					reply(String(err));
+				}).on('end', function () {
+					__err('Success');
+					__childProcess.default.exec(`webpmux -set exif ./tmp/data.exif ${nameSticker} -o ${nameSticker}`, async (error) => {
+						await sleep(1000);
+						await sendSticker(jid, __fs.default.readFileSync(nameSticker));
+						__fs.default.unlinkSync(nameFile);
+						__fs.default.unlinkSync(nameSticker);
+					});
+				}).addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`]).toFormat('webp').save(nameSticker);
+			} catch (e) {
+				reply(Bug);
+				__err(e)
+			}
+		};
+		const isMedia = (type === "imageMessage" || type === "videoMessage");
 		const isQuotedImage = type === "extendedTextMessage" && content.includes("imageMessage");
+		const isQuotedVideo = type === "extendedTextMessage" && content.includes("videoMessage");
+		const isQuotedAudio = type === "extendedTextMessage" && content.includes("audioMessage");
 
-		if (!love.key.fromMe && banChats === true) return;
-		if ((Object.keys(love.message)[0] === 'ephemeralMessage' && JSON.stringify(love.message).includes('EPHEMERAL_SETTING')) && love.message.ephemeralMessage.message.protocolMessage.type === 3) {
-			bugsol = love.participants[0];
-			tekuss = `\`\`\`Bug Terdeteksi\`\`\`
-				\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n
-				\`\`\`@${bugsol.split('@')[0]} Mengirim Bug Digrup ${groupName}\`\`\``;
-			xcoders.sendMessage(love.key.remoteJid, 'WAH BUG NIH', "conversation");
-			xcoders.sendMessage(love.key.remoteJid, tekuss, "conversation", { contexInfo: { mentionedJid: [bugsol] } });
-		}
 		if (isGroup) {
-			if (isCmd) console.log(color('=> [ EXEC ]', 'yellow'), color(moment(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), command, color('from', 'yellow'), pushname2, color('in'), groupName);
-			if (!isCmd) console.log(color('=> [ MESSAGE ]', 'red'), color(moment(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), color('from', 'yellow'), pushname2, color('in'), groupName);
+			if ((isCmd && !m.isBaileys)) console.log(color('[ EXEC ]', 'yellow'), color(__moment.default(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), command, color('from', 'yellow'), pushname2, color('in'), groupName);
+			if ((!isCmd && !m.isBaileys)) console.log(color('[ MESSAGE ]', 'red'), color(__moment.default(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), color('from', 'yellow'), pushname2, color('in'), groupName);
 		}
 		if (!isGroup) {
-			if (isCmd) console.log(color('=> [ EXEC ]', 'red'), color(moment(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), command, color('from', 'yellow'), pushname2);
-			if (!isCmd) console.log(color('=> [ MESSAGE ]', 'red'), color(moment(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), color('from', 'yellow'), pushname2);
+			if ((isCmd && !m.isBaileys)) console.log(color('[ EXEC ]', 'red'), color(__moment.default(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), command, color('from', 'yellow'), pushname2);
+			if ((!isCmd && !m.isBaileys)) console.log(color('[ MESSAGE ]', 'red'), color(__moment.default(love.messageTimestamp.low * 1000).format('DD/MM/YY HH:mm:ss'), 'green'), color('from', 'yellow'), pushname2);
 		}
 		//fitur
 		switch (command) {
 			case 'help':
-			case 'menu':
-				const fitur = Features(prefix);
-				const allFitur = fitur.length / 24;
-				const FiturCount = allFitur.toString().split(".")[0];
 				xcoders.sendMessage(from,
 					{
-						"contentText": fitur,
-						"footerText": `⊳ *Features Count:* ${FiturCount} Fitur\n\n${Ucapan} & Happy Nice Days 💫`,
+						"contentText": Features(prefix),
+						"footerText": `\n${Ucapan} & Happy Nice Days 💫`,
 						"buttons": [
 							{
 								"buttonId": `${prefix}runtime`,
@@ -194,30 +234,30 @@ module.exports = index = async (xcoders, love, getbattery) => {
 						"locationMessage": {
 							"degreesLatitude": 0,
 							"degreesLongitude": 0,
-							"jpegThumbnail": await fs.readFileSync('./image/menu.png')
+							"jpegThumbnail": await __fs.default.readFileSync('./image/menu.png')
 						},
 					}, MessageType.buttonsMessage, { quoted: love, contextInfo: { mentionedJid: [sender] } });
 				break;
 			case 'information':
-				string = `\n💫 Owner: @${ownerNumber[0].split("@")[0]}\n♨️ Rest APIs: ${restApi}\n🔰 Script: https://github.com/Fxc7/weabot-example/\n⏲️ Jam: ${Jam}\n📆 Tanggal: ${tanggal()}\n\n\nBot Ini Dibuat Untuk Example Rest Api\nMaaf Jika Masih Ada Bug\nUntuk apikey silahkan register/beli\n`
+				const string = `\n💫 Owner: @${ownerNumber[0].split("@")[0]}\n♨️ Rest APIs: ${restApi}\n🔰 Script: https://github.com/Fxc7/weabot-example/\n⏲️ Jam: ${Jam}\n📆 Tanggal: ${tanggal()}\n\n\nBot Ini Dibuat Untuk Example Rest Api\nMaaf Jika Masih Ada Bug\nUntuk apikey silahkan register/beli\n`
 				xcoders.sendMessage(from, string, "conversation", { quoted: love, contextInfo: { mentionedJid: [ownerNumber[0]] } })
 				break;
 			case 'stat':
 				let ii = [];
 				let giidd = [];
 				const used = process.memoryUsage();
-				const cpus = os.cpus().map(cpu => {
+				const cpus = __os.default.cpus().map(cpu => {
 					cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
 					return cpu;
 				});
 				const cpu = cpus.reduce((last, cpu, _, { length }) => {
-					last.total += cpu.total
-					last.speed += cpu.speed / length
-					last.times.user += cpu.times.user
-					last.times.nice += cpu.times.nice
-					last.times.sys += cpu.times.sys
-					last.times.idle += cpu.times.idle
-					last.times.irq += cpu.times.irq
+					last.total += cpu.total;
+					last.speed += cpu.speed / length;
+					last.times.user += cpu.times.user;
+					last.times.nice += cpu.times.nice;
+					last.times.sys += cpu.times.sys;
+					last.times.idle += cpu.times.idle;
+					last.times.irq += cpu.times.irq;
 					return last;
 				}, {
 					speed: 0,
@@ -230,21 +270,21 @@ module.exports = index = async (xcoders, love, getbattery) => {
 						irq: 0
 					}
 				});
-				let timestamp = speed();
-				let latensi = speed() - timestamp;
-				const newSpeed = performance.now();
-				const oldSpeed = performance.now();
+				let timestamp = __speed.default();
+				let latensi = __speed.default() - timestamp;
+				const newSpeed = __performance.default.now();
+				const oldSpeed = __performance.default.now();
 				for (mem of totalchat) { ii.push(mem.jid) }
 				for (id of ii) { if (id && id.includes('g.us')) { giidd.push(id) } }
 				var { device_manufacturer, device_model, mcc, mnc, os_version, os_build_number, wa_version } = xcoders.user.phone;
-				totalChat = `${totalchat.length}`;
-				groupChat = `${giidd.length}`;
-				personalChat = `${totalchat.length - giidd.length}`;
-				xcoders.sendMessage(from, monospace(botstat(latensi, oldSpeed, newSpeed, kyun, sizeFormat, used, cpus, cpu, os, xcoders, totalChat, groupChat, personalChat, device_manufacturer, device_model, mcc, mnc, os_version, os_build_number, wa_version)), "conversation", { quoted: fakeQuoted })
+				const totalChat = `${totalchat.length}`;
+				const groupChat = `${giidd.length}`;
+				const personalChat = `${totalchat.length - giidd.length}`;
+				xcoders.sendMessage(from, monospace(botstat(latensi, oldSpeed, newSpeed, kyun, sizeFormat, used, cpus, cpu, __os.default, xcoders, totalChat, groupChat, personalChat, device_manufacturer, device_model, mcc, mnc, os_version, os_build_number, wa_version)), "conversation", { quoted: fakeQuoted })
 				break;
 			case 'cekbattery':
-				Batre = `${getbattery[0].value !== undefined ? getbattery[0].value : "Not Identification ✖️"}`;
-				statusBatre = `${getbattery[0].live == 'true' ? "Charging ⚡" : "Not Charging ✖️"}`;
+				const Batre = `${getbattery[0].value !== undefined ? getbattery[0].value : "Not Identification ✖️"}`;
+				const statusBatre = `${getbattery[0].live == 'true' ? "Charging ⚡" : "Not Charging ✖️"}`;
 				reply(`${Batre}% ${statusBatre}`);
 				break;
 
@@ -252,7 +292,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'ytshort':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtube.com/shorts/g3DMeUAXqLA?feature=share`);
 				if (!query.match(/youtube.com\/short/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/ytshort?url=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/ytshort?url=${query}&apikey=${apikey}`);
 				if (res.status == false) return reply(Bug);
 				ytshort = `\n\t\t\t\t[ YOUTUBE SHORT ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -264,7 +304,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'ytmp3':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp3?url=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/ytmp3?url=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.status == false) return reply(Bug);
 				ytmp3 = `\n\t\t\t\t[ YOUTUBE MP3 ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				buff = await getBuffer(res.result.thumbnail);
@@ -276,7 +316,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'ytmp4':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://youtu.be/Nq5rzeJ5Ab4`);
 				if (!query.match(/youtu/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/ytmp4?url=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/ytmp4?url=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.status == false) return reply(Bug);
 				ytmp4 = `\n\t\t\t\t[ YOUTUBE MP4 ]\n\n⊳ Title: ${res.result.title}\n⊳ Quality: ${res.result.quality}\n⊳ Size: ${res.result.size}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -287,7 +327,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'joox':
 				if (args.length < 1) return reply(`Example: ${prefix + command} momolog pamumgkas`);
-				res = await getJson(`https://api-xcoders.xyz/api/download/joox?query=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/joox?query=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				joox = `\n\t\t\t\t[ JOOX DOWNLOADER ]\n\n⊳ Title: ${res.result.judul}\n⊳ Artist: ${res.result.artist}\n⊳ Album: ${res.result.album}\n⊳ Size: ${res.result.size}\n⊳ Duration: ${res.result.duration}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -299,9 +339,9 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'fbdl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.facebook.com/alanwalkermusic/videos/277641643524720`);
 				if (!query.match(/facebook/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/fb?url=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/fb?url=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
-				const fbdlUrl = await axios.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
+				const fbdlUrl = await __axios.default.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
 				if (res.result.data.size > 50000000) {
 					fbdl = `\n\t\t\t\t[ FACEBOOK DOWNLOADER ]\n\n⊳ Size: ${res.result.data.formattedSize}\n⊳ Quality: ${res.result.data.quality}\n\n\nOps Your Request Soo Large Please Klick Url Below To Download Video\n\n⊳ Url: ${fbdlUrl.data}`;
 					buff = await getBuffer(res.result.thumbnail);
@@ -352,9 +392,9 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'igtv':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.instagram.com/tv/CSW1PMohXDm/?utm_medium=copy_link`)
 				if (!query.match(/instagram\.com\/tv/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/igtv?url=${query}&apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/download/igtv?url=${query}&apikey=${apikey}`)
 				if (res.result == undefined || res.status == false) return reply(Bug);
-				const igtvUrl = await axios.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
+				const igtvUrl = await __axios.default.get(`https://tinyurl.com/api-create.php?url=${res.result.data.url}`);
 				if (res.result.data.size > 50000000) {
 					igtv = `\n\t\t[ INSTAGRAM TV DOWNLOADER ]\n\n⊳ Title: ${res.result.title}\n⊳ Size: ${res.result.data.formattedSize}\n⊳ Quality: ${res.result.data.quality}\n\n\nOps Your Request Soo Large Please Klick Url Below To Download Video\n\n⊳ Url: ${igtvUrl.data}`;
 					buff = await getBuffer(res.result.thumbnail);
@@ -371,14 +411,11 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'tiktok': case 'ttdl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://vt.tiktok.com/ZSJhvu1AE`);
 				if (!query.match(/tiktok/gi)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/download/tiktok4?url=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/download/tiktok3?url=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
-				tiktok = `\n\t\t\t[ TIKTOK DOWNLOADER ]\n\n⊳ Username: ${res.result.username}\n⊳ Nickname: ${res.result.nickname}\n⊳ Viewers: ${res.result.views}\n⊳ Description: ${res.result.description}\n`
-				thumbnail = await getBuffer(res.result.thumbnail);
-				buff = await getBuffer(res.result.no_wm);
-				sendImage(from, thumbnail, tiktok);
 				reply(Waiting);
-				sendVideo(from, buff, Sukses);
+				const caption = `\n\t\t\t\t『 TIKTOK DOWNLOADER	』\n\n• Request Form: @${sender.split("@")[0]}\nMerespon Dalam: ${res.processed}\n`;
+				xcoders.sendMessage(from, {"contentText": caption, "footerText": `Choose one of the buttons below`, "buttons": [{"buttonId": res.result.audio, "buttonText": {"displayText": "⏸️ AUDIO"}, "type": "RESPONSE"}, {"buttonId": res.result.video_nowm, "buttonText": {"displayText": "🎦 VIDEO"}, "type": "RESPONSE"}], "headerType": 6, "locationMessage": {"degreesLatitude": 0, "degreesLongitude": 0, "jpegThumbnail": await getBuffer(res.result.thumbnail)}}, "buttonsMessage", { quoted: love, contextInfo: { mentionedJid: [sender] } });
 				break;
 			case 'soundcloud': case 'scdl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://m.soundcloud.com/licooys/pamungkas-monolog`);
@@ -450,7 +487,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'stickerline':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://store.line.me/stickershop/product/12489506/id`);
-				if (!query.match(/sticker\.line\.me/gi)) return reply(invalidUrl);
+				if (!query.match(/store\.line\.me/gi)) return reply(invalidUrl);
 				await getJson(`https://api-xcoders.xyz/api/download/linesticker?url=${query}&apikey=${apikey}`).then(async res => {
 					if (res.result == undefined || res.status == false) return reply(Bug);
 					stickerline = `\n\t\t\t[ STICKER LINE DOWNLOADER ]\n\nTitle: ${res.result.name}\nType: ${res.result.type}\nAuthor: ${res.result.author}\nPrice: ${res.result.price}\nCurrency: ${res.result.currency}\nProduct URL: ${res.result.product_url}\n\n\nGambar Dikirim Di Private Chat Biar Ga Terjadi Spam Di Group.`
@@ -458,11 +495,8 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					reply(Waiting);
 					sendImage(from, thumbnail, stickerline);
 					for (let stickerURL of res.result.sticker) {
-						buff = await getBuffer(stickerURL.static_url);
-						await createSticker(buff, packname, author).then(async res => {
-							await delay(2000)
-							await sendSticker(sender, res);
-						})
+						sleep(1000);
+						sendStickerFromUrl(from, stickerURL.static_url);
 					}
 				}).catch(() => reply(Bug));
 				break;
@@ -531,47 +565,64 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			//end stalker
 
-			//Maker fitur 
+			//Maker fitur
 			case 'sticker': case 'stiker': case 's':
-				reply(Waiting);
-				if (query && /https?:\/\//.test(query)) {
-					buff = await getBuffer(query);
-					await createSticker(buff, packname, author).then(async res => {
-						await sendSticker(from, res);
-					}).catch(() => reply(Bug));
+				if (isMedia && !love.message.videoMessage || isQuotedImage) {
+					const encmedia = isQuotedImage ? JSON.parse(JSON.stringify(love).replace('quotedM', 'm')).message.extendedTextMessage.contextInfo : love;
+					const media = await xcoders.downloadAndSaveMediaMessage(encmedia, `./tmp/${sender}`);
+					reply(Waiting);
+					await __ffmpeg.default(`${media}`).on('start', function (cmd) {
+					}).on('error', function (err) {
+						__fs.default.unlinkSync(media)
+						reply(Bug)
+					}).on('end', function () {
+						__err('Finish')
+						__childProcess.default.exec(`webpmux -set exif ./tmp/data.exif ./tmp/${sender}.webp -o ./tmp/${sender}.webp`, async (error) => {
+							await sendSticker(from, __fs.default.readFileSync(`./tmp/${sender}.webp`))
+								.then(async () => {
+									await delay(1000)
+									__fs.default.unlinkSync(media)
+									__fs.default.unlinkSync(`./tmp/${sender}.webp`)
+								})
+						})
+					}).addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`]).toFormat('webp').save(`./tmp/${sender}.webp`)
+				} else if ((isMedia && love.message.videoMessage.fileLength < 10000000 || isQuotedVideo && love.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage.fileLength < 10000000)) {
+					const encmedia = isQuotedVideo ? JSON.parse(JSON.stringify(love).replace('quotedM', 'm')).message.extendedTextMessage.contextInfo : love
+					const media = await xcoders.downloadAndSaveMediaMessage(encmedia, `./tmp/${sender}`)
+					reply(Waiting)
+					await __ffmpeg.default(`${media}`).input(media).on('start', function (cmd) {
+					}).on('error', function (err) {
+						__fs.default.unlinkSync(media)
+						reply(Bug)
+					}).on('end', function () {
+						__err('Finish')
+						__childProcess.default.exec(`webpmux -set exif ./tmp/data.exif ./tmp/${sender}.webp -o ./tmp/${sender}.webp`, async (error) => {
+							await sendSticker(from, __fs.default.readFileSync(`./tmp/${sender}.webp`))
+								.then(async () => {
+									delay(2000);
+									__fs.default.unlinkSync(media)
+									__fs.default.unlinkSync(`./tmp/${sender}.webp`)
+								})
+						})
+					}).addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`]).toFormat('webp').save(`./tmp/${sender}.webp`)
 				} else {
-					buffer = m.quoted ? m.quoted : m;
-					buff = await buffer.download();
-					if ((buffer.mtype == "imageMessage" && buffer.mtype !== "videoMessage")) {
-						await createSticker(buff, packname, author).then(res => sendSticker(from, res)).catch(e => reply(String(e)));
-					} else if ((buffer.mtype == "videoMessage" && love.message.extendedTextMessage.contextInfo
-						.quotedMessage.videoMessage.seconds < 10)) {
-						await createSticker(buff, packname, author).then(res => sendSticker(from, res)).catch(e => reply(String(e)));
-					} else {
-						reply("Duration Terlalu Panjang");
-					}
+					reply(`Send Image/Video With Caption ${prefix}sticker Or Reply/Mentioning Image/Video Already Sent\n\n[ Note : Maximum video/gif Duration is 10 Seconds ]`)
 				}
-				break;
+				break
 			case 'ttp': case 'ttp3':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan`);
-				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?text=${query}&apikey=${apikey}`);
-				filType = await fromBuffer(buff);
-				if (filType == undefined) {
-					reply(Bug);
-				} else {
-					reply(Waiting);
-					await createSticker(buff, packname, author).then(async buffer => await sendSticker(from, buffer)).catch(e => reply(String(e)));
-				}
+				reply(Waiting);
+				sendStickerFromUrl(from, `https://api-xcoders.xyz/api/maker/${command}?text=${query}&apikey=${apikey}`);
 				break;
-			case 'tahta': case 'harta':
+			case 'tahta': case 'nulis': case 'sertitolol':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan`);
-				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/tahta?text=${query}&apikey=${apikey}`)
+				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?text=${query}&apikey=${apikey}`)
 				filType = await fromBuffer(buff);
 				if (filType == undefined) {
 					reply(Bug);
 				} else {
 					reply(Waiting);
-					sendImage(from, buff, `HARTA TAHTA ${query.toUpperCase()}`)
+					sendImage(from, buff)
 				}
 				break;
 			case 'ssweb':
@@ -586,7 +637,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					sendImage(from, buff);
 				}
 				break;
-			case 'nulis': case 'tulis':
+			case 'nulis2': case 'tulis2':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Farhan|12 TKR 4|Teks nya`);
 				nama = query.split("|")[0];
 				kelas = query.split("|")[1];
@@ -614,6 +665,19 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					sendImage(from, buff)
 				}
 				break;
+			case 'smeme':
+				if(args.length < 1) return reply(`Example: Reply Gambar dan caption: ${prefix + command} text|text2`);
+				text = query.split("|")[0];
+				text2 = query.split("|")[1];
+				buffer = await m.quoted.download();
+				url = await __uploader.default(buffer)
+				if(!buffer) return reply('Reply Gambar');
+				buff = `https://api-xcoders.xyz/api/maker/meme?url=${url}&text=${text}&text2=${text2}&apikey=${apikey}`;
+				sendStickerFromUrl(from, buff);
+			break
+			case 'carbontext':
+			case 'tobecontinue':
+			case 'spongebob':
 			case 'wasted':
 			case 'wanted':
 			case 'jail':
@@ -639,7 +703,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				buffer = m.quoted ? m.quoted : m;
 				if (!/image/gi.test(buffer.mtype)) return reply(`Reply Gambar dengan caption ${prefix + command}`);
 				bufferImage = await buffer.download();
-				upload = await uploader(bufferImage);
+				upload = await __uploader.default(bufferImage);
 				buff = await getBuffer(`https://api-xcoders.xyz/api/maker/${command}?url=${upload}&apikey=${apikey}`);
 				filType = await fromBuffer(buff);
 				if (filType == undefined) {
@@ -730,7 +794,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			//Information fitur
 			case 'trendtweet':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
-				res = await getJson(`https://api-xcoders.xyz/api/info/trend/twitter?country=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/info/trend/twitter?country=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendtweet = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
@@ -741,7 +805,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'trendyt':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
-				res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube?country=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube?country=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendyt = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
@@ -754,7 +818,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'trendytgaming':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Indonesia`);
-				res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube/gaming?country=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/info/trend/youtube/gaming?country=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.data.length < 1 || res.status == false) return reply(Bug)
 				reply(Waiting)
 				let trendytgaming = `${res.result.message}\n⊳ Updated At ${res.result.updated_at}\n\n`;
@@ -822,7 +886,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			//anime search & image fitur
 			case 'kusonime':
 				if (args.length < 1) return reply(`Example: ${prefix + command} boruto`)
-				res = await getJson(`https://api-xcoders.xyz/api/anime/kusonime?query=${query}&apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/anime/kusonime?query=${query}&apikey=${apikey}`)
 				if (anu.result == undefined || anu.status == false) return reply(Bug);
 				let kusonime = `\n\t\t\t\t[ KUSONIME SEARCH ]\n\n`
 				for (let i = 0; i < res.result.length; i++) {
@@ -834,7 +898,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'manga':
 				if (args.length < 1) return reply(`Example: ${prefix + command} kimetsu no yaiba`);
-				res = await getJson(`https://api-xcoders.xyz/api/anime/manga?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/anime/manga?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				manga = `\n\t\t\t\t[ MANGA SEARCHING ]\n\nTitle: ${res.result.title}\nName: ${res.result.name}\nAuthor: ${res.result.author}\nGenre: ${res.result.genre}\nRating: ${res.result.rating}\nRelased: ${res.result.relased}\nPublished: ${res.result.published}\nCategory: ${res.result.category}\n\n${res.result.description}\n\n==========================\n\n\n`;
 				for (let i = 0; i < res.result.download.length; i++) {
@@ -862,7 +926,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'cerpen':
 				if (args.length < 1) return reply(`Example: ${prefix + command} cinta\n\nOptional:\n⊳ cinta\n⊳ sahabat\n⊳ perjuangan\n⊳ horor\n⊳ lucu\n`)
 				if (!query.match(/(cinta|sahabat|perjuangan|horor|lucu)/g)) return reply("Option Query not available")
-				res = await getJson(`https://api-xcoders.xyz/api/random/cerpen/${query}?apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/random/cerpen/${query}?apikey=${apikey}`)
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				cerpen = `\n\t\t\t\t[ RANDOM CERPEN ${query.toUpperCase()} ]\n\nTitle: ${res.result.judul}\nPenulis: ${res.result.penulis}\nSumber: ${res.result.sumber}\n\n\n${res.result.cerita}\n`
@@ -879,7 +943,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				}
 				break;
 			case 'randombokep':
-				res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`)
 				if (res.result == undefined || res.result == false) return reply(Bug);
 				bkp = `\n\t\t\t\t[ RANDOM BOKEP ] \n\nTitle: ${res.result.title}\nUploaded: ${res.result.views}\nURL: ${res.result.url}\n`
 				thumbnail = await getBuffer(res.result.thumb);
@@ -887,7 +951,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				sendImage(from, thumbnail, bkp);
 				break;
 			case 'cersex':
-				res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/random/cersex?apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				cersex = `\n\t\t\t\t[ RANDOM CERSEX ] \n\nTitle: ${res.result.title}\nPublished: ${res.result.date}\n\n${res.result.cerita}\n`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -905,7 +969,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				}
 				break;
 			case 'ppcouple':
-				res = await getJson(`https://api-xcoders.xyz/api/random/ppcouple?apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/random/ppcouple?apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				ppcwo = await getBuffer(res.result.ppcwo);
 				ppcwe = await getBuffer(res.result.ppcwe);
@@ -916,9 +980,9 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			//end random
 
 			//searching fitur
-			case 'tiktoksearch':
+			case 'tiktoksearch': case 'ttsearch':
 				if (args.length < 1) return reply(`Example: ${prefix + command} chikakiku`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/tiktok?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/tiktok?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				ttsearch = `\n\t\t\t\t[ TIKTOK SEARCHING ]\n\nUsername: ${res.result.username}\nNickname: ${res.result.nickname}\nViewers: ${res.result.views}\nDescription: \n${res.result.description}`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -929,7 +993,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'ytsearch':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Bot WhatsApp`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/youtube?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/youtube?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				let ytsearch = `\n\t\t\t\t[ YOUTUBE SEARCHING ]\n\n`;
 				for (let i = 0; i < res.result.length; i++) {
@@ -941,7 +1005,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'bokepsearch':
 				if (args.length < 1) return reply(`Example ${prefix + command} Tante`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/bokephub?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/bokephub?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				bokepsearch = `\n\t\t\t\t[ BOKEP SEARCH ${query.toUpperCase()} ]\n\n`;
 				for (let i = 0; i < res.result.length; i++) {
@@ -953,7 +1017,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'xnxxsearch':
 				if (args.length < 1) return reply(`Example: ${prefix + command} moms`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/xnxx?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/xnxx?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				xnxxs = `\n\t\t\t\t[ XNXX SEARCHING ]\n\n`;
 				for (let i = 0; i < res.result.length; i++) {
@@ -964,7 +1028,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'xvideossearch':
 				if (args.length < 1) return reply(`Example: ${prefix + command} moms`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/xvideos?query=${query}&apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/search/xvideos?query=${query}&apikey=${apikey}`)
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let xvideossrch = `\n\t\t\t\t[ XVIDEOS SEARCH ]\n\n`;
@@ -976,18 +1040,18 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'searchsticker': case 'searchstiker':
 				if (args.length < 1) return reply(`Example: ${prefix + command} pentol`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/sticker?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/sticker?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				ini_stickers = res.result.sticker;
 				reply(Waiting);
-				for (stickers_ in ini_stickers) {
-					buff = await getBuffer(ini_stickers[stickers_]);
-					await createSticker(buff, packname, author).then(buffer => sendSticker(sender, buffer)).catch(e => reply(String(e)));
+				for (let i = 0; i < ini_stickers.length; i++) {
+					sleep(1000)
+					sendStickerFromUrl(from, ini_stickers[i])
 				}
 				break;
 			case 'searchgc': case 'searchgroup': case 'searchgrup':
 				if (args.length < 1) return reply(`Example: ${prefix + command} bot`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/groupwa?query=${query}&apikey=${apikey}`)
+				var res = await getJson(`https://api-xcoders.xyz/api/search/groupwa?query=${query}&apikey=${apikey}`)
 				if (res.result == undefined || res.result.length < 1 || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let searchgc = `\n\t\t\t\t[ GROUP SEARCH ]\n\n`;
@@ -999,7 +1063,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'readwp': case 'bacawp':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://www.wattpad.com/699514963-bucin-satu/`);
 				if (!query.match(/wattpad\.com\/(?:[1-9][0-9]+)\-/g)) return reply(invalidUrl);
-				res = await getJson(`https://api-xcoders.xyz/api/search/bacawp?url=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/bacawp?url=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				readwp = `\n\t\t\t\t[ READ WATTPAD ]\n\n⊳ Title: ${res.result.title}\n⊳ Author: ${res.result.author_name}\n⊳ Vote: ${res.result.vote}\n⊳ Comment: ${res.result.comment}\n⊳ Next Page: ${res.result.next_page}\n⊳ Story: ${res.result.story}`;
 				thumbnail = await getBuffer(res.result.thumb);
@@ -1008,7 +1072,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'searchwp':
 				if (args.length < 1) return reply(`Example: ${prefix + command} bucin`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/wattpad?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/wattpad?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let searchwp = `\n\t\t\t\t[ SEARCHING WATTPAD ]\n\n`
@@ -1020,7 +1084,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'googleplay':
 				if (args.length < 1) return reply(`Example: ${prefix + command} whatsapp`)
-				res = await getJson(`https://api-xcoders.xyz/api/search/googleplay?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/googleplay?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				let gpsearch = `\n\t\t\t\t[ GOOGLE PLAY SEARCH ]\n\n`;
 				for (let i = 0; i < res.result.length; i++) {
@@ -1032,7 +1096,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'gimage':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Onic Kayess`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/image?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/image?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				for (let i = 0; i < 5; i++) {
@@ -1042,7 +1106,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'pinterest':
 				if (args.length < 1) return reply(`Example: ${prefix + command} Onic Kayess`);
-				res = await getJson(`https://api-xcoders.xyz/api/search/pinterest?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/pinterest?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false);
 				reply(Waiting);
 				for (let i = 0; i < 5; i++) {
@@ -1052,7 +1116,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'wiki': case 'wikipedia':
 				if (args.length < 1) return reply(`Example: ${prefix + command} jagung`)
-				res = await getJson(`https://api-xcoders.xyz/api/search/wikipedia?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/wikipedia?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				wiki = `\n\t\t\t\t[ WIKIPEDIA SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Publisher: ${res.result.publisher}\n⊳ Publish At: ${res.result.datePublished}\n⊳ Result: ${res.result.context}`;
 				thumbnail = await getBuffer(res.result.thumbnail);
@@ -1061,7 +1125,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'lirik': case 'lyrics':
 				if (args.length < 1) return reply(`Example: ${prefix + command} bukti`)
-				res = await getJson(`https://api-xcoders.xyz/api/search/liriklagu?query=${query}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/search/liriklagu?query=${query}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				lirik = `\n\t\t\t\t[ LIRIK SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Lyrics: ${res.result.lyrics}`
 				thumbnail = await getBuffer(res.result.thumb);
@@ -1071,11 +1135,11 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'chord':
 				if (args.length < 1) return reply(`Example: ${prefix + command} duka`);
 				try {
-					res = await getJson(`https://api-xcoders.xyz/api/search/chordlagu?query=${query}&apikey=${apikey}`);
+					var res = await getJson(`https://api-xcoders.xyz/api/search/chordlagu?query=${query}&apikey=${apikey}`);
 					reply(Waiting);
 					reply(`\n\t\t\t\t[ CHORD SEARCH ]\n\n⊳ Title: ${res.result.title}\n⊳ Chord:\n${res.result.chord}`);
 				} catch (err) {
-					console.log(err)
+					__err(err)
 					reply(`Lirik dari lagu ${query} tidak ditemukan`)
 				}
 				break;
@@ -1083,7 +1147,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 
 			//islam fitur
 			case 'asmaulhusna':
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/asmaulhusna?apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/asmaulhusna?apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let pp = `\t\t\t\t\t [ ASMAUL HUSNA ]\n`;
@@ -1097,7 +1161,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'jadwalsholat':
 				if (args.length < 1) return reply(`Example: ${prefix + command} banyuwangi`);
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/jadwalshalat?query=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/jadwalshalat?query=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				str = `\t\t\t\t\t [ JADWAL SHOLAT ]\n\n⊳ Daerah: ${res.result.lokasi}\n⊳ Date: ${res.result.date}\n⊳ Timezone: ${res.result.timezone}\n⊳ Subuh: ${res.result.imsak}\n⊳ Dhuha: ${res.result.sunrise}\n⊳ Dzuhur: ${res.result.dzuhur}\n⊳ Ashar: ${res.result.ashar}\n⊳ Maghrib: ${res.result.maghrib}\n⊳ Isya: ${res.result.isya}`;
@@ -1105,7 +1169,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'surahnumber':
 				if (args.length < 1 || !Number(query)) return reply(`Example: ${prefix + command} 10`);
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/surah?number=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/surah?number=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				reply(Waiting);
 				let surahnumber = `\t\t\t\t\t [ SURAH NUMBER ${encodeURIComponent(query)} ]\n\n⊳ Surah: ${res.result.name}\n⊳ All Ayat: ${res.result.all_ayat}\n⊳ Number Surah: ${res.result.surah_number}\n⊳ Type: ${res.result.type}\n\n`;
@@ -1122,7 +1186,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				text = query.split("/")[0];
 				number = query.split("/")[1];
 				if (args.length < 1 || !Number(number)) return reply(`Example: ${prefix + command} bukhari/20`);
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/hadits?kitab=${text}&number=${number}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/hadits?kitab=${text}&number=${number}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `⊳ ${res.result.hadist}\n\n⊳ ${res.result.result}\n\n⊳ ${res.result.translate_id}`;
 				reply(capt);
@@ -1131,7 +1195,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				number_surah = query.split("/")[0];
 				number_ayat = query.split("/")[1];
 				if (args.length < 1 || !Number(number_surah) || !Number(number_ayat) || !number_ayat) return reply(`Example: ${prefix + command} 1/5`);
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/quran?surah=${number_surah}&ayat=${number_ayat}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/quran?surah=${number_surah}&ayat=${number_ayat}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `⊳ Surah: ${res.result.surah}\n⊳ Number: ${res.result.surah_no}\n⊳ Ayat: ${res.result.ayat_no}\n\n ${res.result.text_arab}\n\n${res.result.translate_id}\n\n\t\t\t\t\t\t\t [ TAFSIR AYAT ]\n\n ${res.result.tafsir.long}`;
 				reply(capt);
@@ -1141,7 +1205,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			case 'kisahnabi':
 				if (args.length < 1) return reply(`Example: ${prefix + command} muhammad`);
-				res = await getJson(`https://api-xcoders.xyz/api/muslim/kisahnabi?nabi=${encodeURIComponent(query)}&apikey=${apikey}`);
+				var res = await getJson(`https://api-xcoders.xyz/api/muslim/kisahnabi?nabi=${encodeURIComponent(query)}&apikey=${apikey}`);
 				if (res.result == undefined || res.status == false) return reply(Bug);
 				capt = `\t\t\t[ KISAH NABI ${res.result.name.toUpperCase()} ]\n\n⊳ Lahir: ${res.result.kelahiran}\n⊳ Wafat: ${res.result.wafat_usia}\n⊳ Singgah: ${res.result.singgah}\n\n${res.result.kisah}\n`;
 				reply(Waiting);
@@ -1149,29 +1213,32 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			//end islamic
 
-			//converter
+			//tools fitur
 			case 'tourl':
 				buffer = m.quoted ? m.quoted : m;
 				if (!/image|video/gi.test(buffer.mtype)) return reply(`Reply Video/Gambar dengan caption ${prefix + command}`);
 				reply(Waiting);
-				res = await uploader(await buffer.download());
+				var res = await __uploader.default(await buffer.download());
 				if (!res) return reply(Bug);
 				reply(res);
+				break;
+			case 'coinmarket':
+				reply(Waiting);
+				var res = await getJson(`https://api-xcoders.xyz/api/tools/coinmarket?apikey=${apikey}`);
+				if(res.result == undefined || res.status == false) return reply(Bug);
+				let cmc = '\n\t\t\t\t[ CHECK COIN MARKET ]\n\n';
+				for(var cm of res.result) {
+					cmc += `⊳ Rank: ${cm.rank}\n⊳ Name Coin: ${cm.name}\n⊳ Price: ${cm.price}\n⊳ 24 Hours: ${cm['24h']}\n⊳ 7 Days: ${cm['7d']}\n⊳ Market Cap: ${cm.marketCap}\n⊳ Volume: ${cm.volume}\n⊳ Circulating: ${cm.circulatingSupply}\n\n\n`;
+				}
+				reply(cmc);
 				break;
 			case 'tinyurl':
 				if (args.length < 1) return reply(`Example: ${prefix + command} https://api-xcoders.xyz`);
 				if (!isUrl(args[0])) return reply(invalidUrl);
-				await axios.get(`https://tinyurl.com/api-create.php?url=${args[0]}`)
-					.then(({ data }) => {
-						reply(Waiting);
-						reply(data);
-					})
-					.catch(e => {
-						reply(Bug);
-						console.log(e);
-					});
+				var res = await getJson(`https://api-xcoders.xyz/api/tools/tinyurl?url=${query}&apikey=${apikey}`);
+				reply(res.result);
 				break;
-			//end convert
+			//end tools
 
 			//Group Features
 			case 'grup': case 'group':
@@ -1270,7 +1337,17 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				break;
 			//End Group Features
 
-			//Owner Only
+			//Owner Only 
+			case 'setexif':
+				if (!isMe) return;
+				exif.create(packname, author, "data");
+				reply("done");
+				break;
+			case 'setexif2':
+				if (!isMe) return;
+				__WSF.default.createExif(packname, author, `./tmp/data2`);
+				reply("done");
+				break;
 			case 'chatall':
 				if (!isMe) return;
 				try {
@@ -1279,7 +1356,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 					for (m = 0; m < fil.length; m++) {
 						tyt = Object.keys(fil[m]).includes('metadata') ? fil[m].metadata.participants.length : 0;
 						tiot = Object.keys(fil[m]).includes('metadata') ? fil[m].metadata.creation : 1;
-						teh += `⊳ Id Grub: ${fil[m].jid}\n⊳ Nama: ${fil[m].name}\n⊳ Dibuat : ${moment(`${tiot}` * 1000).tz('Asia/Jakarta').format('DD/MM/YYYY HH:mm:ss')}\n⊳ Total Pesan Belum Di Baca: ${fil[m].messages.length}\n⊳ Total Member: ${tyt} \n\n`;
+						teh += `⊳ Id Grub: ${fil[m].jid}\n⊳ Nama: ${fil[m].name}\n⊳ Dibuat : ${__moment.default(`${tiot}` * 1000).tz('Asia/Jakarta').format('DD/MM/YYYY HH:mm:ss')}\n⊳ Total Pesan Belum Di Baca: ${fil[m].messages.length}\n⊳ Total Member: ${tyt} \n\n`;
 					}
 					teh = teh.trim();
 					reply(teh);
@@ -1326,7 +1403,7 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				if (!isQuotedImage) return reply('Reply Image');
 				buff = m.quoted ? m.quoted : m;
 				buffer = await buff.download();
-				fs.writeFileSync(`./image/${encodeURIComponent(query)}.png`, buffer);
+				__fs.default.writeFileSync(`./image/${encodeURIComponent(query)}.png`, buffer);
 				reply(Sukses);
 				break;
 			case 'return':
@@ -1393,17 +1470,17 @@ module.exports = index = async (xcoders, love, getbattery) => {
 			case 'deletechat':
 				if (!isMe) return;
 				reply('succes delete this chat');
-				console.log('succes delete chat = ' + from);
+				__err('succes delete chat = ' + from);
 				xcoders.modifyChat(from, ChatModification.delete);
 				break;
 			case 'inspect':
 				if (args.length < 1) return reply('Wrong format!');
 				codee = query.split('https://chat.whatsapp.com/')[1];
-				res = await xcoders.query({
+				var res = await xcoders.query({
 					json: ["query", "invite", codee],
 					expect200: true
 				});
-				str = `\n\t\t\t「 Group Link Inspector 」\n\n⊳ Id: ${res.id}\n⊳ Nama grup: ${res.subject}\n⊳ Dibuat oleh @${res.id.split('-')[0]}\n⊳ pada ${formatDate(res.creation * 1000)}${res.subjectOwner ? `\n⊳ Judul diubah oleh @${res.subjectOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.subjectTime * 1000)}` : ''}${res.descOwner ? `\n⊳  Deskripsi diubah oleh @${res.descOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.descTime * 1000)}` : ''}\n⊳ Jumlah Member: ${res.size}\n⊳ Teman yang diketahui join: ${res.participants ? '\n' + res.participants.map((user, i) => ++i + '. @' + user.id.split(`@`)[0]).join('\n').trim() : 'Tidak ada'}\n${res.desc ? `\n⊳ Deskripsi:\n${res.desc}` : '\nTidak ada Deskripsi'} `;
+				str = `\n\t\t\t「 Group Link Inspector 」\n\n⊳ Id: ${res.id}\n⊳ Nama grup: ${res.subject}\n⊳ Dibuat oleh @${res.id.split('-')[0]}\n⊳ pada ${formatDate(res.creation * 1000)}${res.subjectOwner ? `\n⊳ Judul diubah oleh @${res.subjectOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.subjectTime * 1000)}` : ''}${res.descOwner ? `\n⊳	Deskripsi diubah oleh @${res.descOwner.split(`@`)[0]}\n⊳ pada ${formatDate(res.descTime * 1000)}` : ''}\n⊳ Jumlah Member: ${res.size}\n⊳ Teman yang diketahui join: ${res.participants ? '\n' + res.participants.map((user, i) => ++i + '. @' + user.id.split(`@`)[0]).join('\n').trim() : 'Tidak ada'}\n${res.desc ? `\n⊳ Deskripsi:\n${res.desc}` : '\nTidak ada Deskripsi'} `;
 				let getProfile;
 				try {
 					getProfile = await xcoders.getProfilePicture(res.id);
@@ -1414,36 +1491,46 @@ module.exports = index = async (xcoders, love, getbattery) => {
 				xcoders.sendMessage(from, buff, 'imageMessage', { quoted: love, caption: monospace(str), contextInfo: { mentionedJid: xcoders.parseMention(str) } });
 				break;
 			default:
+			if(buttonsResponseText == "🎦 VIDEO") {
+				reply(Waiting);
+				buff = await getBuffer(buttonsResponseID);
+				sendVideo(from, buff);
+			}
+			if(buttonsResponseText == "⏸️ AUDIO") {
+				reply(Waiting);
+				buff = await getBuffer(buttonsResponseID);
+				sendAudio(from, buff, getRandom(".mp3"));
+			}
+
 				if ((budy.startsWith('>') || budy.startsWith('=>')) && !m.isBaileys) {
 					if (!isMe) return;
 					try {
 						const evaling = await eval(`;(async () => { ${budy.slice(2)} })()`)
-						const formating = util.format(evaling);
+						const formating = __util.default.format(evaling);
 						reply('🗿 ' + formating);
 					} catch (err) {
-						xcoders.sendMessage(from, String(err), "conversation", { quoted: love })
+						reply(String(err))
 					}
 				}
 				if (budy.startsWith('$')) {
 					if (!isMe) return
-					exec(budy.slice(2), (err, stdout) => {
+					__childProcess.default.exec(budy.slice(2), (err, stdout) => {
 						if (err) return reply(String(err))
 						if (stdout) return reply(String(stdout));
 					})
 				}
 		}
 	} catch (e) {
-		e = String(e);
-		if (!e.includes("this.isZero")) {
-			console.log('Message Error : %s', color(e, 'yellow'));
+		if (!String(e).includes("this.isZero")) {
+			console.log(e);
 		}
 	}
 };
 
 let file = require.resolve(__filename);
-fs.watchFile(file, () => {
-	fs.unwatchFile(file);
-	console.log(`Update Case.js`);
+__fs.default.watchFile(file, () => {
+__fs.default.unwatchFile(file);
+	console.log(`Update Case`);
 	delete require.cache[file];
 	require(file);
 });
