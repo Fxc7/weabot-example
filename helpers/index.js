@@ -1,12 +1,11 @@
 'use strict';
 const fs = require("fs");
-const { M } = require("human-readable");
 
 const m = '```';
 const b = '*';
 const Features = (prefix) => {
-  let number = 0;
-  return `\t\t꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷\n\n\n
+	let number = 0;
+	return `\t\t꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷\n\n\n
 \t\t\t\t\t</ ${b}DOWNLOADER${b} >
 
 ${m}[ ${number += 1} ] ${prefix}ytshort${m}
@@ -44,11 +43,17 @@ ${m}[ ${number += 1} ] ${prefix}githubstalk${m}
 
 \t\t\t\t\t</ ${b}MAKER${b} >
 
+${m}[ ${number += 1} ] ${prefix}smeme${m}
 ${m}[ ${number += 1} ] ${prefix}ttp${m}
 ${m}[ ${number += 1} ] ${prefix}ttp3${m}
 ${m}[ ${number += 1} ] ${prefix}sticker${m}
 ${m}[ ${number += 1} ] ${prefix}nulis${m}
+${m}[ ${number += 1} ] ${prefix}nulis2${m}
 ${m}[ ${number += 1} ] ${prefix}ssweb${m}
+${m}[ ${number += 1} ] ${prefix}sertitolol${m}
+${m}[ ${number += 1} ] ${prefix}tobecontinue${m}
+${m}[ ${number += 1} ] ${prefix}carbontext${m}
+${m}[ ${number += 1} ] ${prefix}spongebob${m}
 ${m}[ ${number += 1} ] ${prefix}wasted${m}
 ${m}[ ${number += 1} ] ${prefix}wanted${m}
 ${m}[ ${number += 1} ] ${prefix}jail${m}
@@ -172,6 +177,7 @@ ${m}[ ${number += 1} ] ${prefix}chord${m}
 
 ${m}[ ${number += 1} ] ${prefix}tourl${m}
 ${m}[ ${number += 1} ] ${prefix}tinyurl${m}
+${m}[ ${number += 1} ] ${prefix}coinmarket${m}
 
 \t\t\t\t\t</ ${b}ONLY GROUPS${b} >
 
@@ -206,16 +212,16 @@ ${m}[ ${number += 1} ] ${prefix}deletechat${m}
 `};
 
 const botstat = (latensi, oldSpeed, newSpeed, kyun, sizeFormat, used, cpus, cpu, os, xcoders, totalChat, groupChat, personalChat, device_manufacturer, device_model, mcc, mnc, os_version, os_build_number, wa_version) => {
-  return `
+	return `
 Kecepatan Respon ${latensi.toFixed(4)} _Second_ \n ${oldSpeed - newSpeed} _miliseconds_\n\nRuntime : ${kyun(process.uptime())}
 
-  📞 Info WhatsApp
+	📞 Info WhatsApp
 ⊳ Group Chats:[ ${groupChat} Groups ]
 ⊳ Personal Chats:[ ${personalChat} Message ]
 ⊳ Total Chats:[ ${totalChat} Chats ]
 ⊳ Wa version:[ ${wa_version} ]
 
-  💻 Info Server
+	💻 Info Server
 ⊳ Device:[ ${device_manufacturer} ]
 ⊳ Brand Device:[ ${device_model} ]
 ⊳ Server:[ ${xcoders.browserDescription[0]} ]
@@ -232,22 +238,22 @@ Kecepatan Respon ${latensi.toFixed(4)} _Second_ \n ${oldSpeed - newSpeed} _milis
 ⊳ Platform:[ ${os.platform()} ]
 ⊳ Hostname:[ ${os.hostname()} ]
 
-  🔰 NodeJS Memory Usage
+	🔰 NodeJS Memory Usage
 ${Object.keys(used).map((key, _, arr) => `⊳ ${key.padEnd(Math.max(...arr.map(v => v.length)), ' ')}: ${sizeFormat(used[key])}`).join('\n')}
 ${cpus[0] ? `\n\t🌐 Total CPU Usage 
 ${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `⊳ ${(type).padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
 
-  ♨️ CPU Core(s) Usage (${cpus.length} Core CPU)
+	♨️ CPU Core(s) Usage (${cpus.length} Core CPU)
 ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `⊳ ${(type).padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}` : ''}
-`.trim()
+`.trim();
 };
 
 module.exports = { Features, botstat };
 
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
-  fs.unwatchFile(file);
-  console.log(`Update Features.js`);
-  delete require.cache[file];
-  require(file);
+	fs.unwatchFile(file);
+	console.log(`Update Features.js`);
+	delete require.cache[file];
+	require(file);
 });
